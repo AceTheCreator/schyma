@@ -6,6 +6,8 @@
   ],
   "compilerOptions": {
     "module": "esnext",
+    "plugins": [{ "name": "typescript-plugin-css-modules" }],
+    "target": "ES2016",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
     "declaration": true,
@@ -18,6 +20,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,

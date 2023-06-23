@@ -17,6 +17,7 @@
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\"",
     "test": "jest --config jestconfig.json",
     "prepare": "npm run build",
+    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs",
     "prepublishOnly": "npm test && npm run prettier && npm run lint"
   },
   "peerDependencies": {
@@ -36,10 +37,14 @@
   "license": "MIT",
   "devDependencies": {
     "@testing-library/react": "^13.3.0",
+    "@tisoap/react-flow-smart-edge": "^3.0.0",
+    "@types/dagre": "^0.7.48",
     "@types/jest": "^28.1.1",
     "@types/react": "^18.0.12",
+    "@types/react-syntax-highlighter": "^15.5.7",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
+    "dagre": "^0.8.5",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -48,10 +53,17 @@
     "jest": "^28.1.1",
     "jest-canvas-mock": "^2.4.0",
     "jest-environment-jsdom": "^28.1.1",
+    "mini-css-extract-plugin": "^2.7.6",
     "prettier": "^2.6.2",
-    "react": "^18.1.0",
+    "react": "^18.2.0",
     "react-dom": "^18.1.0",
+    "reactflow": "^11.7.4",
     "ts-jest": "^28.0.4",
-    "typescript": "^4.7.3"
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "react-syntax-highlighter": "^15.5.0",
+    "tslib": "^2.5.3",
+    "typescript-plugin-css-modules": "^5.0.1"
   }
 }

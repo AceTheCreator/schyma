@@ -1,26 +1,27 @@
-import React, { useState } from 'react'
+import React from "react";
+import { Node } from 'reactflow';
+import Panel from "./Panel";
+import { useState } from "react";
+import Nodes from "./Nodes";
 
-type Props = {
-  value?: number
-}
-const MyCounter = ({ value = 0 }: Props) => {
-  const [counter, setCounter] = useState(value)
-
-  const onMinus = () => {
-    setCounter((prev) => prev - 1)
-  }
-
-  const onPlus = () => {
-    setCounter((prev) => prev + 1)
-  }
-
+function Visualizer() {
+  const [currentNode, setCurrentNode] = useState<Node>();
+  const [nodes, passNodes] = useState<Node[]>();
   return (
     <div>
-      <h1>Counter: {counter}</h1>
-      <button onClick={onMinus}>-</button>
-      <button onClick={onPlus}>+</button>
+      <div className="body-wrapper">
+        <div className="node-container w-[60%] flex flex-col">
+          <div className="m-3 rounded-lg">
+            <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} />
+          </div>
+        </div>
+        <Panel
+          node={currentNode}
+          nodes={nodes}
+        />
+      </div>
     </div>
-  )
+  );
 }
 
-export default MyCounter
+export default Visualizer
