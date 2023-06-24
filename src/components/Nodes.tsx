@@ -26,7 +26,6 @@ const initialEdges = [
     labelBgPadding: [8, 4],
     labelBgBorderRadius: 4,
     animated: true,
-    style: { stroke: '#fff' },
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
@@ -163,7 +162,7 @@ const Nodes = ({ setCurrentNode, passNodes }: NodeProps ) => {
               title: item.title,
               examples: item.examples
             },
-            style: { border: required && required.includes(item.name) ? '1px dashed #EB38AB' : '1px dashed #777', padding: 10, background: '#1E293B', color: 'white' },
+            style: { padding: 10, background: '#1E293B', color: 'white' },
             sourcePosition: "right",
             targetPosition: "left",
             draggable: false,
@@ -178,7 +177,7 @@ const Nodes = ({ setCurrentNode, passNodes }: NodeProps ) => {
             source: item?.data?.parent,
             target: item?.id,
             animated: true,
-            style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : '#fff' },
+            style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
             markerEnd: {
               type: MarkerType.ArrowClosed,
             },

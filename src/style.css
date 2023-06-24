@@ -21,6 +21,61 @@
   overflow-y: scroll;
 }
 
+.panel > h1 {
+  margin: 10px;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.panel > h1::first-letter{
+  text-transform: uppercase;
+}
+
+.panel > p {
+  font-size: 16px;
+  margin: 10px;
+}
+
+.panel_table-wrapper{
+  position: relative;
+  overflow-x: auto;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+
+.panel_table-wrapper > table {
+  width: 100%;
+  font-size: 14px;
+  text-align: left;
+}
+
+.panel_table-wrapper > table > thead {
+  background-color: #1E293B;
+  color: white;
+}
+
+.panel_table-wrapper > table > thead > tr > th {
+  padding: 15px
+}
+
+.panel_table-wrapper_tbody {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.297);
+}
+
+.panel_table-wrapper_tbody > th {
+  padding: 18px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.panel_table-wrapper_tbody_active{
+  background: #1E293B;
+  height: 50px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.297);
+  color: white;
+}
+
 .react-flow__container {
   position: absolute;
   width: 100%;
@@ -207,6 +262,7 @@
     transform: translateX(-50%);
   }
 .react-flow__attribution {
+  display: none;
   font-size: 10px;
   background: rgba(255, 255, 255, 0.5);
   padding: 2px 3px;

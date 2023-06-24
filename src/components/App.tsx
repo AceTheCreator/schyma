@@ -4,18 +4,23 @@ import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
 
-function Visualizer() {
+interface Default {
+  title: string;
+  description: string;
+}
+
+function Visualizer({title, description}: Default ) {
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nodes, passNodes] = useState<Node[]>();
   return (
     <div>
       <div className="body-wrapper">
-        <div className="node-container w-[60%] flex flex-col">
-          <div className="m-3 rounded-lg">
+        <div className="node-container">
             <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} />
-          </div>
         </div>
         <Panel
+          title={title}
+          description={description}
           node={currentNode}
           nodes={nodes}
         />
