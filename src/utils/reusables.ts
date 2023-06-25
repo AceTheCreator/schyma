@@ -28,30 +28,30 @@ export function removeChildren(parentNode: any, nodes: any) {
   return newNodes;
 }
 
-// export function retrieveObj(theObject: any, key: string) {
-//   var result = null;
-//   if (theObject instanceof Array) {
-//     for (var i = 0; i < theObject.length; i++) {
-//       result = retrieveObj(theObject[i], key);
-//       if (result) {
-//         break;
-//       }
-//     }
-//   } else {
-//     for (var prop in theObject) {
-//       if (prop == key) {
-//         return theObject[prop];
-//       }
-//       if (
-//         theObject[prop] instanceof Object ||
-//         theObject[prop] instanceof Array
-//       ) {
-//         result = retrieveObj(theObject[prop], key);
-//         if (result) {
-//           break;
-//         }
-//       }
-//     }
-//   }
-//   return result;
-// }
+export function retrieveObj(theObject: any, key: string) {
+  var result:any = null;
+  if (theObject instanceof Array) {
+    for (var i = 0; i < theObject.length; i++) {
+      result = retrieveObj(theObject[i], key);
+      if (result) {
+        break;
+      }
+    }
+  } else {
+    for (var prop in theObject) {
+      if (prop == key) {
+        return theObject[prop];
+      }
+      if (
+        theObject[prop] instanceof Object ||
+        theObject[prop] instanceof Array
+      ) {
+        result = retrieveObj(theObject[prop], key);
+        if (result) {
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
