@@ -18,7 +18,7 @@ type MyObject = { [x: string]: any };
 
 interface PropertiesInterface extends TreeInterface {
   properties?: MyObject;
-  additionalProperties?: AdditionalProperties;
+  additionalProperties?: AdditionalProperties | boolean;
   patternProperties?: MyObject;
   $id?: string;
   allOf?: Array<PropertiesInterface>;
