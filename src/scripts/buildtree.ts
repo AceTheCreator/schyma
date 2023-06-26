@@ -92,7 +92,7 @@ function extractPatternProps(
   newProperty: MyObject,
   parent: number
 ) {
-  const obj = object.patternProperties;
+  const obj: any = object.patternProperties;
   if (obj[Object.keys(obj)[0]] && obj[Object.keys(obj)[0]].oneOf) {
     const arrayProps = obj[Object.keys(obj)[0]].oneOf;
     for (let i = 0; i < arrayProps.length; i++) {
@@ -107,9 +107,7 @@ function extractPatternProps(
       newProperty[property] = obj[property];
       newProperty[property].parent = parent;
       newProperty[property].name = property;
-      newProperty[property].id = String(
-        parseInt(Math.random(100000000) * 1000000)
-      );
+      newProperty[property].id =  String( Math.floor(Math.random() * 1000000))
       newProperty[property].children = [];
     }
   }
@@ -120,7 +118,7 @@ function extractAdditionalProps(
   newProperty: MyObject,
   parent: number
 ) {
-  const obj = object.additionalProperties;
+  const obj: any = object.additionalProperties;
   const arrayProps = obj.oneOf || obj.anyOf;
   if (arrayProps) {
     for (let i = 0; i < arrayProps.length; i++) {
@@ -176,7 +174,7 @@ function extractArrayProps(
   parent: number
 ) {
   if (object.anyOf || object.allOf || object.oneOf) {
-    const arrayOfProps = object.allOf || object.oneOf;
+    const arrayOfProps:any = object.allOf || object.oneOf;
     if (arrayOfProps) {
       for (let i = 0; i < arrayOfProps.length; i++) {
         if (arrayOfProps[i]["$ref"]) {
@@ -267,9 +265,9 @@ function buildRoot(
   properties: MyObject
 ) {
   if (type === "initial") {
-    const properties = buildProperties(schema, parentId);
-    object.title = schema.title;
-    object.required = schema.required;
+    const properties = buildProperties(object, parentId);
+    object.title = object.title;
+    object.required = object.required;
     for (const property in properties) {
       if (properties[property].type === "array" && properties[property].items) {
         const items = properties[property].items;
@@ -284,7 +282,7 @@ function buildRoot(
         children: [],
       });
     }
-    const objChildren = object.children;
+    const objChildren:any = object.children;
     for (let i = 0; i < objChildren.length; i++) {
       if (objChildren[i]["$ref"]) {
         const res = fetchExamples(objChildren[i]["$ref"]);
@@ -325,7 +323,7 @@ function buildRoot(
           });
       }
     }
-    const objChildren = object.children;
+    const objChildren: any = object.children;
     for (let i = 0; i < objChildren.length; i++) {
       if (objChildren[i]["$ref"]) {
         const res = fetchExamples(objChildren[i]["$ref"]);
