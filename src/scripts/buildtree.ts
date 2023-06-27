@@ -1,6 +1,6 @@
 import { retrieveObj } from "../utils/reusables";
 
-let schema: object
+let schema: PropertiesInterface
 
 type TreeInterface = {
   required: any;
@@ -265,9 +265,9 @@ function buildRoot(
   properties: MyObject
 ) {
   if (type === "initial") {
-    const properties = buildProperties(object, parentId);
-    object.title = object.title;
-    object.required = object.required;
+    const properties = buildProperties(schema, parentId);
+    object.title = schema.title;
+    object.required = schema.required;
     for (const property in properties) {
       if (properties[property].type === "array" && properties[property].items) {
         const items = properties[property].items;
@@ -345,7 +345,7 @@ function buildRoot(
   }
 }
 
-export default function buildTree(schemaObject: object) {
+export default function buildTree(schemaObject: PropertiesInterface) {
   const parentLeaf: TreeInterface = {
       id: 1,
       name: "",

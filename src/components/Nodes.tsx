@@ -14,7 +14,6 @@ import ReactFlow, {
   Connection,
 } from "reactflow";
 import dagre from "dagre";
-import version26 from "../config/tree.json";
 import { removeChildren } from "../utils/reusables";
 
 const initialEdges = [
@@ -67,21 +66,22 @@ const getLayoutedElements = (nodes: any, edges: any, direction = "TB") => {
   return { nodes, edges };
 };
 
-const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-  version26,
-  initialEdges
-);
-
 
 type MyObject = { [x: string]: any };
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void;
-  passNodes: (node: typeof layoutedNodes) => void;
+  passNodes: (node: any) => void;
+  tree: any
 };
 
-const Nodes = ({ setCurrentNode, passNodes }: NodeProps ) => {
-  let initialNodes: MyObject = version26;
+const Nodes = ({ setCurrentNode, passNodes, tree }: NodeProps) => {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+    tree,
+    initialEdges
+  );
+
+  let initialNodes: MyObject = tree;
 
 
   const { setCenter } = useReactFlow();
@@ -136,7 +136,7 @@ const Nodes = ({ setCurrentNode, passNodes }: NodeProps ) => {
       }),
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [version26]);
+  }, [tree]);
 
   const handleNodeClick = (
     _event: React.MouseEvent,
@@ -231,8 +231,8 @@ const Nodes = ({ setCurrentNode, passNodes }: NodeProps ) => {
 };
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, passNodes }: NodeProps) => (
+export default ({ setCurrentNode, passNodes, tree }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} />
+    <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} tree={tree} />
   </ReactFlowProvider>
 );
