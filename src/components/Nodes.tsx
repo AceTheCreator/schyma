@@ -149,7 +149,6 @@ const Nodes = ({ setCurrentNode, passNodes, tree }: NodeProps) => {
       const required = data.data.required;
       const itemChildren = [
         ...data.data.children.map((item: MyObject) => {
-          console.log(item)
           return {
             id: item.id,
             type: item?.children?.length ? "default" : "output",

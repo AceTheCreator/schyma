@@ -20,11 +20,10 @@ function Visualizer({ title, description, schema }: Default) {
   const [tree, setTree] = useState(null)
   useEffect(() => {
     // validate schema
-    async function build(schema: any) {
+    async function build(schema: JSONSchema7Object) {
     const validate = ajv.validateSchema(schema);
     if (validate) {
       const res: any = await startBuild(schema)
-      console.log(res)
       setTree(res)
     }
     }

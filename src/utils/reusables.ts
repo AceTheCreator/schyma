@@ -28,7 +28,7 @@ export function removeChildren(parentNode: any, nodes: any) {
   return newNodes;
 }
 
-export function retrieveObj(theObject: any, key: string) {
+export function retrieveObj(theObject: any, key: string | undefined) {
   var result:any = null;
   if (theObject instanceof Array) {
     for (var i = 0; i < theObject.length; i++) {

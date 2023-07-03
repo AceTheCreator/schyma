@@ -1,4 +1,7 @@
 import { retrieveObj } from "../utils/reusables";
+// import $RefParser from "@apidevtools/json-schema-ref-parser";
+// import fetch from "node-fetch";
+
 
 let schema: PropertiesInterface
 
@@ -24,6 +27,8 @@ interface PropertiesInterface extends TreeInterface {
   allOf?: Array<PropertiesInterface>;
   anyOf?: Array<PropertiesInterface>;
   oneOf?: Array<PropertiesInterface>;
+  items?: any;
+  definitions?: any
 }
 
 interface AdditionalProperties extends TreeInterface {
@@ -43,15 +48,26 @@ function fetchExamples(ref: string) {
   return null;
 }
 
-function buildFromChildren(object: TreeInterface) {
+
+function buildFromChildren(object: any) {
+
+  const key = object["$ref"]?.split('/').slice(-1)[0];
   if (object["$ref"]) {
-    const data = retrieveObj(schema, object["$ref"]);
+    const defs = schema.definitions;
+    let data = null
+    for (const def in defs) {
+      if (def === key) {
+        data = defs[def]
+      }
+    }
+    // const data = retrieveObj(schema.definitions, key);
     object = {
       ...object,
       ...data,
     };
   }
   const properties = buildProperties(object, object.id);
+  // console.log(properties)
   buildRoot(object, object.id, "children", properties);
 }
 
@@ -122,9 +138,11 @@ function extractAdditionalProps(
   const arrayProps = obj.oneOf || obj.anyOf;
   if (arrayProps) {
     for (let i = 0; i < arrayProps.length; i++) {
-      const newRef = arrayProps[i]["$ref"].split("/").slice(-1)[0];
+      if (arrayProps[i]["$ref"]) {
+        const newRef = arrayProps[i]["$ref"].split("/").slice(-1)[0];
       const title = newRef.split(".")[0];
       newProperty[title] = arrayProps[i];
+      }
     }
   }
   if (typeof obj === "object" && obj.items) {
@@ -173,6 +191,21 @@ function extractArrayProps(
   newProperty: MyObject,
   parent: number
 ) {
+  if (object.items) {
+    const items = object.items
+    for (const item in items) {
+      if (item === "$ref") {
+        const newRef = items[item].split("/").slice(-1)[0];
+        const title = newRef.split(".")[0];
+        newProperty[title] =  {}
+        newProperty[title].parent = parent;
+        newProperty[title][item] = items[item]
+          newProperty[title].name = title;
+          newProperty[title].id = String(Math.floor(Math.random() * 1000000));
+        newProperty[title].children = [];
+      }
+    }
+  }
   if (object.anyOf || object.allOf || object.oneOf) {
     const arrayOfProps:any = object.allOf || object.oneOf;
     if (arrayOfProps) {
@@ -268,10 +301,15 @@ function buildRoot(
     const properties = buildProperties(schema, parentId);
     object.title = schema.title;
     object.required = schema.required;
+    
     for (const property in properties) {
       if (properties[property].type === "array" && properties[property].items) {
         const items = properties[property].items;
-        properties[property][Object.keys(items)[0]] = Object.values(items)[0];
+        properties[property] = {
+          ...properties[property],
+          ...items
+        }
+        // properties[property][Object.keys(items)[0]] = Object.values(items)[0];
         delete properties[property].items;
       }
       object.children.push({
@@ -296,12 +334,16 @@ function buildRoot(
           objChildren[i].examples = res.examples;
         }
       }
+      // objChildren[i].description = "hello"
       buildFromChildren(objChildren[i]);
     }
   } else {
     if (!object.children) {
       object["children"] = [];
     }
+    // if (object.name === "info") {
+    //   object.description = "welcome"
+    // }
     if (object.children.length <= 0) {
       for (const property in properties) {
         if (
@@ -309,13 +351,17 @@ function buildRoot(
           properties[property].items
         ) {
           const items = properties[property].items;
-          properties[property][Object.keys(items)[0]] = Object.values(items)[0];
+          properties[property] = {
+          ...properties[property],
+          ...items
+          }
+          // properties[property][Object.keys(items)[0]] = Object.values(items)[0];
           delete properties[property].items;
         }
           object.children.push({
             ...properties[property],
             parent: parentId || object.id,
-            name: property,
+            name: properties[property].title || property,
             id:
               properties[property].id ||
              String(Math.floor(Math.random() * 1000000)),
@@ -331,12 +377,12 @@ function buildRoot(
           objChildren[i].description = res.description;
         }
         if (res?.required) {
-          console.log(res)
           objChildren[i].required = res.required;
         }
         if (res?.examples) {
           objChildren[i].examples = res.examples;
         }
+        // console.log(objChildren[i]["$ref"])
       }
       if (objChildren[i].children.length <= 0) {
         buildFromChildren(objChildren[i]);
@@ -345,7 +391,7 @@ function buildRoot(
   }
 }
 
-export default function buildTree(schemaObject: PropertiesInterface) {
+export default async function buildTree(schemaObject: PropertiesInterface) {
   const parentLeaf: TreeInterface = {
       id: 1,
       name: "",
