@@ -1,6 +1,8 @@
-import { retrieveObj } from "../utils/reusables";
+// import { retrieveObj } from "../utils/reusables";
 // import $RefParser from "@apidevtools/json-schema-ref-parser";
 // import fetch from "node-fetch";
+
+import { retrieveObj } from "../utils/reusables";
 
 
 let schema: PropertiesInterface
@@ -42,24 +44,25 @@ interface AdditionalProperties extends TreeInterface {
 
 let tree: Array<TreeInterface> = [];
 
-function fetchExamples(ref: string) {
-  const data = retrieveObj(schema, ref);
-  if (data) return data;
-  return null;
-}
 
 
 function buildFromChildren(object: any) {
-
+    let data = null
   const key = object["$ref"]?.split('/').slice(-1)[0];
+    if (object["$ref"] && object["$ref"].includes('#/definitions/json-schema-draft-07-schema')) {
+    delete object["$ref"]
+    data = {
+      foo: "bar"
+    }
+  }
   if (object["$ref"]) {
     const defs = schema.definitions;
-    let data = null
     for (const def in defs) {
       if (def === key) {
         data = defs[def]
       }
     }
+    delete object["$ref"]
     // const data = retrieveObj(schema.definitions, key);
     object = {
       ...object,
@@ -71,18 +74,30 @@ function buildFromChildren(object: any) {
 }
 
 function retrieveChild(object: any) {
+  let data = null
   const key = object["$ref"]?.split('/').slice(-1)[0];
+  if (object["$ref"]?.split('/').length > 3) {
+    const a = retrieveObj(schema.definitions, key);
+    data = a
+  }
+  if (object["$ref"].includes('#/definitions/json-schema-draft-07-schema')) {
+    delete object["$ref"]
+    data = {
+      foo: "bar"
+    }
+  }
   if (object["$ref"]) {
     const defs = schema.definitions;
-    let data = null
     for (const def in defs) {
       if (def === key) {
+        delete object["$ref"]
         data = defs[def]
       }
     }
-    return data
   }
+  return data
 }
+
 function extractProps(
   object: PropertiesInterface,
   newProperty: MyObject,
@@ -92,17 +107,17 @@ function extractProps(
   for (const property in obj) {
     // TODO: Restructure for message properties
     if (obj[property].oneOf) {
-      extractAdditionalProps(obj[property], newProperty, parent)
-      // obj[property].additionalProperties = {
-      //   oneOf: obj[property].oneOf,
-      // };
-      // const newPatterns = obj[property];
-      // const props = buildProperties(newPatterns, newPatterns.id);
-      // buildRoot(newPatterns, newPatterns.id, "children", props);
+      // extractAdditionalProps(obj[property], newProperty, parent)
+      obj[property].additionalProperties = {
+        oneOf: obj[property].oneOf,
+      };
+      const newPatterns = obj[property];
+      const props = buildProperties(newPatterns, newPatterns.id);
+      buildRoot(newPatterns, newPatterns.id, "children", props);
     }
     if (typeof obj[property] === "object") {
       if (obj[property]["$ref"]) {
-      const rC = retrieveChild(obj[property]);
+        const rC = retrieveChild(obj[property]);
       newProperty[property] = rC;
       newProperty[property].parent = parent;
       newProperty[property].name = property;
@@ -161,18 +176,7 @@ function extractAdditionalProps(
   const obj: any = object.additionalProperties;
   const arrayProps = obj?.oneOf || obj?.anyOf;
   if (arrayProps) {
-    for (let i = 0; i < arrayProps.length; i++) {
-      if (arrayProps[i]["$ref"]) {
-      const newRef = arrayProps[i]["$ref"].split("/").slice(-1)[0];
-        const title = newRef.split(".")[0];
-        const rC = retrieveChild(arrayProps[i]);
-      newProperty[title] = rC;
-      newProperty[title].parent = parent;
-      newProperty[title].name = title;
-      newProperty[title].id = String(Math.floor(Math.random() * 1000000));
-      newProperty[title].children = [];
-      }
-    }
+    extractArrayProps(obj, newProperty, parent)
   }
   if (typeof obj === "object" && obj.items) {
     const items = obj.items;
@@ -180,11 +184,13 @@ function extractAdditionalProps(
   } else {
     for (const property in obj) {
       if (typeof obj[property as keyof AdditionalProperties] === "string") {
-        const data = retrieveObj(schema, obj[property]);
+        if (obj["$ref"]) {
+          const rC = retrieveChild(obj);
         object = {
           ...object,
-          ...data,
+          ...rC,
         };
+        }
         if (obj[property as keyof AdditionalProperties] === object["$id"]) {
           delete object.additionalProperties;
         }
@@ -242,6 +248,19 @@ function extractArrayProps(
         if (arrayOfProps[i]["$ref"]) {
           const newRef = arrayOfProps[i]["$ref"].split("/").slice(-1)[0];
           const title = newRef.split(".")[0];
+          console.log(title)
+          // const rC = retrieveChild(arrayOfProps[i]);
+          // console.log(title)
+          // if (title !== "json-schema-draft-07-schema") {
+          //   const rC = retrieveChild(arrayOfProps[i]);
+          // console.log(rC)
+          // newProperty[title] = { ...rC }; 
+          // }
+          // newProperty[title].parent = parent;
+          // newProperty[title].name = title;
+          // newProperty[title].id = String(Math.floor(Math.random() * 1000000));
+          // newProperty[title].children = [];
+      //     console.log(newProperty)
           newProperty[title] = arrayOfProps[i];
           newProperty[title].parent = parent;
           newProperty[title].name = title;
@@ -351,18 +370,18 @@ function buildRoot(
     }
     const objChildren: any = object.children;
     for (let i = 0; i < objChildren.length; i++) {
-      if (objChildren[i]["$ref"]) {
-        const res = fetchExamples(objChildren[i]["$ref"]);
-        if (res?.description) {
-          objChildren[i].description = res.description;
-        }
-        if (res?.required) {
-          objChildren[i].required = res.required;
-        }
-        if (res?.examples) {
-          objChildren[i].examples = res.examples;
-        }
-      }
+      // if (objChildren[i]["$ref"]) {
+      //   const res = fetchExamples(objChildren[i]["$ref"]);
+      //   if (res?.description) {
+      //     objChildren[i].description = res.description;
+      //   }
+      //   if (res?.required) {
+      //     objChildren[i].required = res.required;
+      //   }
+      //   if (res?.examples) {
+      //     objChildren[i].examples = res.examples;
+      //   }
+      // }
       // objChildren[i].description = "hello"
       buildFromChildren(objChildren[i]);
     }
@@ -399,19 +418,18 @@ function buildRoot(
     }
     const objChildren: any = object.children;
     for (let i = 0; i < objChildren.length; i++) {
-      if (objChildren[i]["$ref"]) {
-        const res = fetchExamples(objChildren[i]["$ref"]);
-        if (res?.description) {
-          objChildren[i].description = res.description;
-        }
-        if (res?.required) {
-          objChildren[i].required = res.required;
-        }
-        if (res?.examples) {
-          objChildren[i].examples = res.examples;
-        }
-        // console.log(objChildren[i]["$ref"])
-      }
+      // if (objChildren[i]["$ref"]) {
+      //   const res = fetchExamples(objChildren[i]["$ref"]);
+      //   if (res?.description) {
+      //     objChildren[i].description = res.description;
+      //   }
+      //   if (res?.required) {
+      //     objChildren[i].required = res.required;
+      //   }
+      //   if (res?.examples) {
+      //     objChildren[i].examples = res.examples;
+      //   }
+      // }
       if (objChildren[i].children.length <= 0) {
         buildFromChildren(objChildren[i]);
       }
