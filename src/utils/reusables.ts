@@ -56,8 +56,23 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
+export function checkRefExists(obj: any, ref: any) {
+  if (obj && obj.$ref && obj.$ref === ref) {
+    delete obj.$ref;
+    return obj;
+  }
+
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      checkRefExists(obj[key], ref)
+    }
+  }
+
+  return false;
+}
+
+
 export function isCyclic(obj: any) {
-  console.log(obj)
   var keys: any[] = [];
   var stack: any[] = [];
   var stackSet = new Set();
