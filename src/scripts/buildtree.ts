@@ -60,36 +60,12 @@ function extractProps(
 ) {
   const obj = object.properties;
   for (const property in obj) {
-    // TODO: Restructure for message properties
-    // if (obj[property].oneOf) {
-    //   // extractAdditionalProps(obj[property], newProperty, parent)
-    //   obj[property].additionalProperties = {
-    //     oneOf: obj[property].oneOf,
-    //   };
-    //   const newPatterns = obj[property];
-    //   const props = buildProperties(newPatterns, newPatterns.id);
-    //   buildRoot(newPatterns, newPatterns.id, "children", props);
-    // }
     if (typeof obj[property] === "object") {
       newProperty[property] = obj[property];
       newProperty[property].parent = parent;
       newProperty[property].name = property;
       newProperty[property].id = String(Math.floor(Math.random() * 1000000));
       newProperty[property].children = [];
-    //  if (obj[property].patternProperties) {
-    //     const patterns = obj[property];
-    //     const props = buildProperties(patterns, patterns.id);
-    //     buildRoot(patterns, patterns.id, "children", props);
-    //     newProperty[property] = patterns;
-    //   }
-    //  else {
-    //    console.log(obj[property])
-    //   newProperty[property] = obj[property];
-    //   newProperty[property].parent = parent;
-    //   newProperty[property].name = property;
-    //   newProperty[property].id = String(Math.floor(Math.random() * 1000000));
-    //   newProperty[property].children = [];
-    //   }
     }
   }
 }
@@ -100,16 +76,6 @@ function extractPatternProps(
   parent: number
 ) {
   const obj: any = object.patternProperties;
-  // if (obj[Object.keys(obj)[0]] && obj[Object.keys(obj)[0]].oneOf) {
-  //   const arrayProps = obj[Object.keys(obj)[0]].oneOf;
-  //   console.log(arrayProps)
-  //   for (let i = 0; i < arrayProps.length; i++) {
-  //     const newRef = arrayProps[i]["$ref"].split("/").slice(-1)[0];
-  //     const title = newRef.split(".")[0];
-  //     newProperty[title] = arrayProps[i];
-  //   }
-  //   delete obj[Object.keys(obj)[0]];
-  // }
   for (const property in obj) {
     if (typeof obj[property] === "object") {
       newProperty[property] = obj[property];
@@ -140,21 +106,6 @@ function extractArrayProps(
   newProperty: MyObject,
   parent: number
 ) {
-  // if (object.items) {
-  //   const items = object.items
-  //   for (const item in items) {
-  //     if (item === "$ref") {
-  //       const newRef = items[item].split("/").slice(-1)[0];
-  //       const title = newRef.split(".")[0];
-  //       newProperty[title] =  {}
-  //       newProperty[title].parent = parent;
-  //       newProperty[title][item] = items[item]
-  //       newProperty[title].name = title;
-  //       newProperty[title].id = String(Math.floor(Math.random() * 1000000));
-  //       newProperty[title].children = [];
-  //     }
-  //   }
-  // }
   if (object.anyOf || object.allOf || object.oneOf) {
     const arrayOfProps:any = object.allOf || object.oneOf || object.anyOf;
     if (arrayOfProps) {
@@ -162,27 +113,11 @@ function extractArrayProps(
         const children = arrayOfProps[i];
           const patterns = children.patternProperties;
           const properties = children.properties;
-          if (patterns) {
-            for (const property in patterns) {
-              newProperty[property] = patterns[property];
-              newProperty[property].id = String(
-                Math.floor(Math.random() * 1000000)
-              );
-              newProperty[property].name = property;
-              newProperty[property].parent = object.id;
-            }
+        if (patterns) {
+            extractPatternProps(patterns, newProperty, parent)
           }
-          if (properties) {
-            for (const property in properties) {
-              if (typeof properties[property] === 'object') {
-                newProperty[property] = properties[property];
-              newProperty[property].id = String(
-                Math.floor(Math.random() * 1000000)
-              );
-              newProperty[property].name = property;
-              newProperty[property].parent = object.id;
-              }
-            }
+        if (properties) {
+          extractProps(children, newProperty, parent)
         }
         if (arrayOfProps[i].oneOf) {
             const title = object.name;
@@ -200,6 +135,18 @@ function extractArrayProps(
   }
 }
 
+function extractItems(
+  object: PropertiesInterface,
+  newProperty: MyObject,
+  parent: number)
+{
+  const items = object.items;
+  if (items.properties) {
+    extractProps(items, newProperty, parent)
+  }
+  
+}
+
 function buildProperties(object: PropertiesInterface, parent: number) {
   let newProperty: any = {};
   if (object.properties) {
@@ -212,6 +159,9 @@ function buildProperties(object: PropertiesInterface, parent: number) {
   }
   if (object.additionalProperties && object.additionalProperties !== false) {
     extractAdditionalProps(object, newProperty, parent);
+  }
+  if (object.items) {
+    extractItems(object, newProperty, parent)
   }
   if (
     !object.properties &&
@@ -235,15 +185,6 @@ function buildRoot(
     object.required = schema.required;
     
     for (const property in properties) {
-      if (properties[property].type === "array" && properties[property].items) {
-        const items = properties[property].items;
-        properties[property] = {
-          ...properties[property],
-          ...items
-        }
-        // properties[property][Object.keys(items)[0]] = Object.values(items)[0];
-        delete properties[property].items;
-      }
       object.children.push({
         ...properties[property],
         parent: parentId,
@@ -266,7 +207,6 @@ function buildRoot(
           objChildren[i].examples = res.examples;
         }
       }
-      // objChildren[i].description = "hello"
       buildFromChildren(objChildren[i]);
     }
   }
@@ -277,18 +217,6 @@ function buildRoot(
 
     if (object.children.length <= 0) {
       for (const property in properties) {
-        if (
-          properties[property].type === "array" &&
-          properties[property].items
-        ) {
-          const items = properties[property].items;
-          properties[property] = {
-          ...properties[property],
-          ...items
-          }
-          properties[property][Object.keys(items)[0]] = Object.values(items)[0];
-          delete properties[property].items;
-        }
           object.children.push({
             ...properties[property],
             parent: parentId || object.id,
