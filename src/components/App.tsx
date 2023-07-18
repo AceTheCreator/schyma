@@ -56,6 +56,7 @@ function Visualizer({ title, description, schema }: Default) {
           }
         }
         traverse(schema, { cb: callbackFn });
+        console.log(schema)
       const res: any = await startBuild(schema)
       setTree(res)
     }
