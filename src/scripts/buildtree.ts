@@ -141,8 +141,12 @@ function extractItems(
   parent: number)
 {
   const items = object.items;
+  const arrayItems = items.oneOf || items.allOf || items.anyOf
   if (items.properties) {
     extractProps(items, newProperty, parent)
+  }
+  if (arrayItems) {
+    extractArrayProps(items, newProperty, parent)
   }
   
 }

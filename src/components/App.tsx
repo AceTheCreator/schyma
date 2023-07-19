@@ -7,7 +7,7 @@ import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import { startBuild } from "../scripts";
 import traverse from 'json-schema-traverse'
-import { checkRefExists, retrieveObj } from "../utils/reusables";
+import { checkRefExists } from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -21,7 +21,6 @@ function Visualizer({ title, description, schema }: Default) {
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nodes, passNodes] = useState<Node[]>();
   const [tree, setTree] = useState(null);
-  const [keeper, setKepper] = useState(null);
 
   function resolveRef(ref: any, rootSchema: any, parentSchema: any) {
     // Assuming the ref is a local reference within the same schema
