@@ -56,7 +56,22 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
+const visited = new Set();
+
+
+
 export function checkRefExists(obj: any, ref: any) {
+  // if (visited.has(obj)) {
+  //   console.log(obj)
+  //   // for (const item in obj) {
+  //   //   console.log(obj[item])
+  //   // }
+  //   // console.log(obj)
+  //   // console.log('visited')
+  //   // delete obj[3];
+  //   // delete obj[4];
+  //   return obj
+  // }
   if (obj && obj.$ref && obj.$ref === ref) {
     delete obj.$ref;
     return obj;
@@ -64,7 +79,7 @@ export function checkRefExists(obj: any, ref: any) {
 
   for (const key in obj) {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
-      checkRefExists(obj[key], ref)
+       checkRefExists(obj[key], ref) 
     }
   }
 

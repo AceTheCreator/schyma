@@ -111,15 +111,15 @@ function extractArrayProps(
     if (arrayOfProps) {
       for (let i = 0; i < arrayOfProps.length; i++) {
         const children = arrayOfProps[i];
-          const patterns = children.patternProperties;
-          const properties = children.properties;
+          const patterns = children?.patternProperties;
+          const properties = children?.properties;
         if (patterns) {
             extractPatternProps(patterns, newProperty, parent)
           }
         if (properties) {
           extractProps(children, newProperty, parent)
         }
-        if (arrayOfProps[i].oneOf) {
+        if (arrayOfProps[i]?.oneOf) {
             const title = object.name;
             const a = arrayOfProps[i].oneOf;
             for (let i = 0; i < a.length; i++) {

@@ -22,7 +22,7 @@ function Visualizer({ title, description, schema }: Default) {
   const [nodes, passNodes] = useState<Node[]>();
   const [tree, setTree] = useState(null);
 
-  function resolveRef(ref: any, rootSchema: any, parentSchema: any) {
+  function resolveRef(ref: any, rootSchema: any) {
     // Assuming the ref is a local reference within the same schema
     const refPath = ref.substring(1).split('/'); // Remove the leading '#' and split the path
     let resolvedSchema = rootSchema;
@@ -38,24 +38,38 @@ function Visualizer({ title, description, schema }: Default) {
         segmentHolder = rootSchema[refPath[i]];
       }
     }
-    checkRefExists(resolvedSchema, ref);
+    // checkRefExists(resolvedSchema, ref);
     return resolvedSchema;
   }
-
+          const visitedSchemas = new Set();
   useEffect(() => {
     // validate schema
     async function build(schema: JSONSchema7Object) {
     const validate = ajv.validateSchema(schema);
       if (validate) {
         function callbackFn(schema: any, JSONPointer: any, rootSchema: any, parentJSONPointer: any, parentKeyword: any, parentSchema: any, keyIndex: any) {
+          console.log('holla')
           if (schema.$ref) {
-            const resolvedSchema = resolveRef(schema.$ref, rootSchema, parentSchema);
+            const ref = schema.$ref;
+            visitedSchemas.add(ref)
+            if (visitedSchemas.has(ref)) {
+              const resolve = resolveRef(schema.$ref, rootSchema);
+              checkRefExists(resolve, ref)
+              Object.assign(schema, resolve); 
+            } else {
+              const resolvedSchema = resolveRef(schema.$ref, rootSchema);
             // Update the current schema with the resolved schema
-            Object.assign(schema, resolvedSchema);
+            Object.assign(schema, resolvedSchema); 
+            }
+          } else {
+            visitedSchemas.add(schema)
+            if (visitedSchemas.has(schema)) {
+              console.log(schema)
+              // Object.assign(schema, {})
+            }
           }
         }
         traverse(schema, { cb: callbackFn });
-        console.log(schema)
       const res: any = await startBuild(schema)
       setTree(res)
     }
