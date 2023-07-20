@@ -7,7 +7,7 @@ import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import { startBuild } from "../scripts";
 import traverse from 'json-schema-traverse'
-import { checkRefExists } from "../utils/reusables";
+import { checkRefExists, deepCopy, isEqual } from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -48,25 +48,11 @@ function Visualizer({ title, description, schema }: Default) {
     const validate = ajv.validateSchema(schema);
       if (validate) {
         function callbackFn(schema: any, JSONPointer: any, rootSchema: any, parentJSONPointer: any, parentKeyword: any, parentSchema: any, keyIndex: any) {
-          console.log('holla')
+          visitedSchemas.add(schema)
           if (schema.$ref) {
-            const ref = schema.$ref;
-            visitedSchemas.add(ref)
-            if (visitedSchemas.has(ref)) {
-              const resolve = resolveRef(schema.$ref, rootSchema);
-              checkRefExists(resolve, ref)
-              Object.assign(schema, resolve); 
-            } else {
-              const resolvedSchema = resolveRef(schema.$ref, rootSchema);
-            // Update the current schema with the resolved schema
-            Object.assign(schema, resolvedSchema); 
-            }
-          } else {
-            visitedSchemas.add(schema)
-            if (visitedSchemas.has(schema)) {
-              console.log(schema)
-              // Object.assign(schema, {})
-            }
+            const resolvedSchema = resolveRef(schema.$ref, rootSchema);
+            const copied = deepCopy(resolvedSchema)
+               Object.assign(schema, copied);
           }
         }
         traverse(schema, { cb: callbackFn });

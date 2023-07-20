@@ -101,6 +101,8 @@ function extractAdditionalProps(
   }
 }
 
+
+
 function extractArrayProps(
   object: PropertiesInterface,
   newProperty: MyObject,

@@ -56,22 +56,37 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
-const visited = new Set();
 
 
+export function deepCopy(obj:any, copiesMap = new WeakMap()) {
+  // If the object is null or not an object, return it as is
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // If the object has already been copied, return the copy
+  if (copiesMap.has(obj)) {
+    return copiesMap.get(obj);
+  }
+
+  // Create an empty object or array to hold the copied properties
+  const newObj:any = Array.isArray(obj) ? [] : {};
+
+  // Add the new object to the copiesMap before copying properties to handle circular references
+  copiesMap.set(obj, newObj);
+
+  // Copy each property from the original object to the new object
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      newObj[key] = deepCopy(obj[key], copiesMap); // Recursively copy nested objects
+    }
+  }
+
+  return newObj;
+}
 
 export function checkRefExists(obj: any, ref: any) {
-  // if (visited.has(obj)) {
-  //   console.log(obj)
-  //   // for (const item in obj) {
-  //   //   console.log(obj[item])
-  //   // }
-  //   // console.log(obj)
-  //   // console.log('visited')
-  //   // delete obj[3];
-  //   // delete obj[4];
-  //   return obj
-  // }
+
   if (obj && obj.$ref && obj.$ref === ref) {
     delete obj.$ref;
     return obj;
@@ -84,41 +99,4 @@ export function checkRefExists(obj: any, ref: any) {
   }
 
   return false;
-}
-
-
-export function isCyclic(obj: any) {
-  var keys: any[] = [];
-  var stack: any[] = [];
-  var stackSet = new Set();
-  var detected = false;
-
-  function detect(obj: any, key: string) {
-    if (obj && typeof obj != 'object') { return; }
-
-    if (stackSet.has(obj)) { // it's cyclic! Print the object and its locations.
-      var oldindex = stack.indexOf(obj);
-      var l1 = keys.join('.') + '.' + key;
-      var l2 = keys.slice(0, oldindex + 1).join('.');
-      console.log('CIRCULAR: ' + l1 + ' = ' + l2 + ' = ' + obj);
-      console.log(obj);
-      detected = true;
-      return;
-    }
-
-    keys.push(key);
-    stack.push(obj);
-    stackSet.add(obj);
-    for (var k in obj) { //dive on the object's children
-      if (Object.prototype.hasOwnProperty.call(obj, k)) { detect(obj[k], k); }
-    }
-
-    keys.pop();
-    stack.pop();
-    stackSet.delete(obj);
-    return;
-  }
-
-  detect(obj, 'obj');
-  return detected;
 }
