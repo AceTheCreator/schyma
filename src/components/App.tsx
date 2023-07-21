@@ -38,7 +38,7 @@ function Visualizer({ title, description, schema }: Default) {
         segmentHolder = rootSchema[refPath[i]];
       }
     }
-    // checkRefExists(resolvedSchema, ref);
+    checkRefExists(resolvedSchema, ref);
     return resolvedSchema;
   }
           const visitedSchemas = new Set();
@@ -52,7 +52,7 @@ function Visualizer({ title, description, schema }: Default) {
           if (schema.$ref) {
             const resolvedSchema = resolveRef(schema.$ref, rootSchema);
             const copied = deepCopy(resolvedSchema)
-               Object.assign(schema, copied);
+            Object.assign(schema, copied);
           }
         }
         traverse(schema, { cb: callbackFn });
