@@ -7,7 +7,7 @@ import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import { startBuild } from "../scripts";
 import traverse from 'json-schema-traverse'
-import { checkRefExists, deepCopy, isEqual } from "../utils/reusables";
+import { checkRefExists, deepCopy } from "../utils/reusables";
 
 interface Default {
   title: string;
