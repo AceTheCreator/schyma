@@ -28,7 +28,7 @@ function Visualizer({ title, description, schema }: Default) {
     async function build(schema: JSONSchema7Object) {
     const validate = ajv.validateSchema(schema);
       if (validate) {
-        function callbackFn(schema: any, JSONPointer: any, rootSchema: any, parentJSONPointer: any, parentKeyword: any, parentSchema: any, keyIndex: any) {
+        function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
           visitedSchemas.add(schema)
           if (schema.$ref) {
             const resolvedSchema = resolveRef(schema.$ref, rootSchema);
