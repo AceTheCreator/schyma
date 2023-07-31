@@ -16,7 +16,7 @@ interface Default {
 }
 
 
-function Visualizer({ title, description, schema }: Default) {
+function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nodes, passNodes] = useState<Node[]>();
@@ -60,4 +60,4 @@ function Visualizer({ title, description, schema }: Default) {
   );
 }
 
-export default Visualizer
+export default Serval
