@@ -31,7 +31,9 @@
   "keywords": [
     "react",
     "typescript",
-    "awesome-project"
+    "api-specifications",
+    "JSONSchema",
+    "APIs"
   ],
   "author": "acethecreator",
   "license": "MIT",
