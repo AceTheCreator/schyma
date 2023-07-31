@@ -41,7 +41,8 @@ function Visualizer({ title, description, schema }: Default) {
     checkRefExists(resolvedSchema, ref);
     return resolvedSchema;
   }
-          const visitedSchemas = new Set();
+  
+  const visitedSchemas = new Set();
   useEffect(() => {
     // validate schema
     async function build(schema: JSONSchema7Object) {
