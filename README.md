@@ -76,4 +76,4 @@ Thank you for your interest in our API Specification Visualizer project! For mor
 
 ## License
 
-MIT Licensed. Copyright (c) Azeez Elegbede 2023.
+Apache Liscence 2.0. Copyright (c) Azeez Elegbede 2023.
