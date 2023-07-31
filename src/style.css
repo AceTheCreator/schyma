@@ -475,3 +475,10 @@
   border-bottom-width: 1px;
   top: 100%;
 }
+.examples-wrapper{
+  margin-top: 50px;
+}
+
+.examples-wrapper > h1 {
+  padding-bottom: 10px;
+}
