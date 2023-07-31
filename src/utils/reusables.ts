@@ -56,9 +56,9 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
-export function resolveRef(ref: any, rootSchema: any) {
+export function resolveRef(ref: string, rootSchema: any) {
   // Assuming the ref is a local reference within the same schema
-  const refPath = ref.substring(1).split('/') // Remove the leading '#' and split the path
+  const refPath: string[] = ref.substring(1).split('/') // Remove the leading '#' and split the path
   let resolvedSchema = rootSchema
   let segmentHolder: any = {}
   segmentHolder = rootSchema[refPath[1]]
@@ -68,7 +68,7 @@ export function resolveRef(ref: any, rootSchema: any) {
   } else {
     resolvedSchema = segmentHolder[refPath[2]]
   }
-  for (let i = 0; i < refPath; i++) {
+  for (let i = 0; i < refPath.length; i++) {
     if (refPath[i] === 'definitions') {
       segmentHolder = rootSchema[refPath[i]]
     }
@@ -104,7 +104,7 @@ export function deepCopy(obj:any, copiesMap = new WeakMap()) {
   return newObj;
 }
 
-export function checkRefExists(obj: any, ref: any) {
+export function checkRefExists(obj: any, ref: string) {
 
   if (obj && obj.$ref && obj.$ref === ref) {
     delete obj.$ref;

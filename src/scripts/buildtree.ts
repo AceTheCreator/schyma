@@ -44,7 +44,7 @@ function fetchExamples(ref: string) {
   return null
 }
 
-function buildFromChildren(object: any) {
+function buildFromChildren(object: PropertiesInterface) {
   const properties = buildProperties(object, object.id)
   buildRoot(object, object.id, 'children', properties)
 }
@@ -153,6 +153,26 @@ function buildProperties(object: PropertiesInterface, parent: number) {
   return newProperty
 }
 
+function iterateChildren(objChildren: any) {
+  for (let i = 0; i < objChildren.length; i++) {
+    if (objChildren[i]['$ref']) {
+      const res = fetchExamples(objChildren[i]['$ref'])
+      if (res?.description) {
+        objChildren[i].description = res.description
+      }
+      if (res?.required) {
+        objChildren[i].required = res.required
+      }
+      if (res?.examples) {
+        objChildren[i].examples = res.examples
+      }
+    }
+    if (objChildren[i].children.length <= 0) {
+      buildFromChildren(objChildren[i])
+    }
+  }
+}
+
 function buildRoot(object: TreeInterface, parentId: number, type: string, properties: MyObject) {
   if (type === 'initial') {
     const properties = buildProperties(schema, parentId)
@@ -169,21 +189,7 @@ function buildRoot(object: TreeInterface, parentId: number, type: string, proper
       })
     }
     const objChildren: any = object.children
-    for (let i = 0; i < objChildren.length; i++) {
-      if (objChildren[i]['$ref']) {
-        const res = fetchExamples(objChildren[i]['$ref'])
-        if (res?.description) {
-          objChildren[i].description = res.description
-        }
-        if (res?.required) {
-          objChildren[i].required = res.required
-        }
-        if (res?.examples) {
-          objChildren[i].examples = res.examples
-        }
-      }
-      buildFromChildren(objChildren[i])
-    }
+    iterateChildren(objChildren)
   } else {
     if (!object.children) {
       object['children'] = []
@@ -201,23 +207,7 @@ function buildRoot(object: TreeInterface, parentId: number, type: string, proper
       }
     }
     const objChildren: any = object.children
-    for (let i = 0; i < objChildren.length; i++) {
-      if (objChildren[i]['$ref']) {
-        const res = fetchExamples(objChildren[i]['$ref'])
-        if (res?.description) {
-          objChildren[i].description = res.description
-        }
-        if (res?.required) {
-          objChildren[i].required = res.required
-        }
-        if (res?.examples) {
-          objChildren[i].examples = res.examples
-        }
-      }
-      if (objChildren[i].children.length <= 0) {
-        buildFromChildren(objChildren[i])
-      }
-    }
+    iterateChildren(objChildren)
   }
 }
 
