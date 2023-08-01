@@ -1,3 +1,3 @@
-import Visualizer from './components/App'
+import Serval from './components/App'
 
-export { Visualizer }
+export { Serval }

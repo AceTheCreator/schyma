@@ -37,6 +37,7 @@ Then use it in your app:
 ```js
 import React, { useState } from 'react';
 import Serval from 'react-serval';
+import 'react-serval/src/style.css'
 import schema from '../config/2.6.0.json';
 
 export default function App() {
