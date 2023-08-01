@@ -76,7 +76,6 @@ type NodeProps = {
 
 const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(tree, initialEdges)
-  console.log(title)
   let initialNodes: MyObject = tree
   initialNodes[0].title = title
 
@@ -177,7 +176,7 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
       setNodes([...layoutedNodes])
       setEdges([...layoutedEdges])
-      if (itemChildren.length) {
+      if (itemChildren.length > 3) {
         focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
       }
     } else {

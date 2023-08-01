@@ -1,5 +1,5 @@
 {
-  "name": "react-serval",
+  "name": "serval-components",
   "version": "1.0.0",
   "description": "JSON Schemas Visualizer React component",
   "main": "./dist/cjs/index.js",
@@ -13,12 +13,8 @@
     "build": "yarn build:esm && yarn build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
-    "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\"",
-    "test": "jest --config jestconfig.json",
     "prepare": "npm run build",
-    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs",
-    "prepublishOnly": "npm test && npm run prettier && npm run lint"
+    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs"
   },
   "peerDependencies": {
     "react": ">=16"
@@ -35,8 +31,8 @@
     "JSONSchema",
     "APIs"
   ],
-  "author": "acethecreator",
-  "license": "MIT",
+  "author": "_acedcreator",
+  "license": "Apache Liscence 2.0",
   "devDependencies": {
     "@testing-library/react": "^13.3.0",
     "@tisoap/react-flow-smart-edge": "^3.0.0",

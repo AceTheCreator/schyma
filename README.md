@@ -36,8 +36,8 @@ Then use it in your app:
 
 ```js
 import React, { useState } from 'react';
-import Serval from 'react-serval';
-import 'react-serval/src/style.css'
+import Serval from 'serval-components';
+import 'serval-components/src/style.css'
 import schema from '../config/2.6.0.json';
 
 export default function App() {
@@ -69,7 +69,7 @@ We welcome contributions from the community! If you find a bug, have a feature r
 
 We would like to thank the contributors and supporters of the API Specification Visualizer project for their valuable contributions and feedback.
 
-If you like React Serval, you should [follow me on Twitter](https://twitter.com/_acebuild)!
+If you like Serval Components, you should [follow me on Twitter](https://twitter.com/_acebuild)!
 
 Shout out to the [AsyncAPI Community](https://github.com/asyncapi), [Lukasz Gornicki](https://github.com/derberg) who along with many other contributors have made this possible ❤️
 
