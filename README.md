@@ -26,10 +26,10 @@ The API Specification Visualizer currently supports the following API specificat
 
 ## Installation & Usage
 
-The easiest way to use react-serval is to install it from npm and build it into your app with Webpack.
+The easiest way to use serval-components is to install it from npm and build it into your app with Webpack.
 
 ```
-yarn add react-serval
+yarn add serval-component
 ```
 
 Then use it in your app:
