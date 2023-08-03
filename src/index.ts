@@ -1,3 +1,3 @@
 import Serval from './components/App'
 
-export { Serval }
+export default Serval
