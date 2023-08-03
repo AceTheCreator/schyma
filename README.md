@@ -14,7 +14,7 @@ The JSON Schema Visualizer is a tool designed to simplify the visualization of J
 
 - Ability to support very large JSON Schemas
 
-- Additional Panel to show the JSON Schema JSON Schema
+- Additional Panel to render selected Node Schema
 
 - Generating dummy APIs fronm the given specification
 
@@ -29,7 +29,7 @@ The JSON Schema Visualizer currently supports the following JSON Schema formats:
 The easiest way to use serval-components is to install it from npm and build it into your app with Webpack.
 
 ```
-npm install serval-component
+npm install serval-components
 ```
 
 Then use it in your app:
