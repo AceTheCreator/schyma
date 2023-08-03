@@ -1,26 +1,26 @@
-# API Specification Visualizer(Serval)
+# JSON Schema Visualizer(Serval)
 
-The API Specification Visualizer is a tool designed to simplify the visualization of API specifications, making it less tedious to learn how different parts of api specs are connected(especially when you’re just starting). The visualizer takes API specification files as input and generates a user-friendly graphical representation of the specification.
+The JSON Schema Visualizer is a tool designed to simplify the visualization of JSON Schemas, making it less tedious to learn how different parts of api specs are connected(especially when you’re just starting). The visualizer takes JSON Schema files as input and generates a user-friendly graphical representation of the specification.
 
 ## Features
 
-- Import API Specifications: The visualizer supports various API specifications, such as AsyncAPI, Postman Collection Format, OpenAPI (formerly Swagger), Github Action Spec and so much more. You can easily import your API specification files into the tool.
+- Import JSON Schemas: The visualizer supports various JSON Schemas, such as AsyncAPI, Postman Collection Format, OpenAPI (formerly Swagger), Github Action Spec and so much more. You can easily import your JSON Schema files into the tool.
 
-- Interactive Visualization: The visualizer provides an interactive and intuitive graphical representation of the API Specification. Names, Descriptions, Examples, and other essential details are visually presented for better understanding.
+- Interactive Visualization: The visualizer provides an interactive and intuitive graphical representation of the JSON Schema. Names, Descriptions, Examples, and other essential details are visually presented for better understanding.
 
 ## Upcoming Features
 
-- Search and Filtering: Quickly search for specific part of the spec or filter. This feature enhances the user experience when dealing with large API specifications.
+- Search and Filtering: Quickly search for specific part of the spec or filter. This feature enhances the user experience when dealing with large JSON Schemas.
 
-- Ability to support very large API specifications
+- Ability to support very large JSON Schemas
 
-- Additional Panel to show the API specification JSON Schema
+- Additional Panel to show the JSON Schema JSON Schema
 
 - Generating dummy APIs fronm the given specification
 
-## Supported API Specification Formats
+## Supported JSON Schema Formats
 
-The API Specification Visualizer currently supports the following API specification formats:
+The JSON Schema Visualizer currently supports the following JSON Schema formats:
 `.json`
 
 
@@ -29,13 +29,13 @@ The API Specification Visualizer currently supports the following API specificat
 The easiest way to use serval-components is to install it from npm and build it into your app with Webpack.
 
 ```
-yarn add serval-component
+npm install serval-component
 ```
 
 Then use it in your app:
 
 ```js
-import React, { useState } from 'react';
+import React from 'react';
 import Serval from 'serval-components';
 import 'serval-components/src/style.css'
 import schema from '../config/2.6.0.json';
@@ -54,11 +54,11 @@ export default function App() {
 
 Common props you may want to specify include:
 
-- `title`: The title of the API specification, which will also be displayed on the initial node.
+- `title`: The title of the JSON Schema, which will also be displayed on the initial node.
 
-- `description`: The description of the API specification being parsed
+- `description`: The description of the JSON Schema being parsed
 
-- `schema`: The API specification schema which will be rendered on the visualizer.
+- `schema`: The JSON Schema schema which will be rendered on the visualizer.
 
 
 ## Contributing
@@ -67,13 +67,13 @@ We welcome contributions from the community! If you find a bug, have a feature r
 
 # Thanks
 
-We would like to thank the contributors and supporters of the API Specification Visualizer project for their valuable contributions and feedback.
+We would like to thank the contributors and supporters of the JSON Schema Visualizer project for their valuable contributions and feedback.
 
 If you like Serval Components, you should [follow me on Twitter](https://twitter.com/_acebuild)!
 
 Shout out to the [AsyncAPI Community](https://github.com/asyncapi), [Lukasz Gornicki](https://github.com/derberg) who along with many other contributors have made this possible ❤️
 
-Thank you for your interest in our API Specification Visualizer project! For more information or to report issues, please visit the [project repository](). Happy visualizing! 🚀
+Thank you for your interest in our JSON Schema Visualizer project! For more information or to report issues, please visit the [project repository](). Happy visualizing! 🚀
 
 ## License
 
