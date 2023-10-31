@@ -16,6 +16,9 @@ import ReactFlow, {
 import dagre from 'dagre'
 import { removeChildren } from '../utils/reusables'
 
+
+const position = { x: 0, y: 0 };
+
 const initialEdges = [
   {
     id: 'edges-e5-7',
@@ -29,7 +32,17 @@ const initialEdges = [
       type: MarkerType.ArrowClosed,
     },
   },
+];
+
+const initialNodes = [
+    {
+      id: '1',
+      type: 'input',
+      data: { label: 'input' },
+      position,
+    },
 ]
+
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
@@ -37,7 +50,7 @@ dagreGraph.setDefaultEdgeLabel(() => ({}))
 const nodeWidth = 172
 const nodeHeight = 36
 
-const getLayoutedElements = (nodes: any, edges: any, direction = 'TB') => {
+const getLayoutedElements = (nodes: any, edges: any, direction = 'LR') => {
   const isHorizontal = direction === 'LR'
   dagreGraph.setGraph({ rankdir: direction })
 
@@ -70,18 +83,16 @@ type MyObject = { [x: string]: any }
 type NodeProps = {
   setCurrentNode: (node: Node) => void
   passNodes: (node: any) => void
-  tree: any,
-  title: string
+  title: string,
+  rNodes: any,
+  rEdges: any
 }
 
-const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(tree, initialEdges)
-  let initialNodes: MyObject = tree
-  initialNodes[0].title = title
-
+const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) => {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges)
   const { setCenter } = useReactFlow()
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(layoutedNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges);
 
   const onConnect = useCallback(
     (connection: Connection) =>
@@ -104,52 +115,20 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
   }
 
   useEffect(() => {
-    setNodes([
-      ...initialNodes.map((item: MyObject) => {
-        return {
-          id: item.id,
-          type: item?.children?.length ? 'default' : 'output',
-          data: {
-            label: item.title,
-            required: item.required,
-            children: item.children,
-            description: item.description,
-            title: item.title,
-            examples: item.examples,
-          },
-          style: {
-            background: '#1E293B',
-            border: '1px dashed #334155',
-            color: 'white',
-            minWidth: '153px',
-          },
-          position: { x: 0, y: 0 },
-          sourcePosition: 'right',
-          targetPosition: 'left',
-        }
-      }),
-    ])
+    console.log(layoutedNodes)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tree])
+  }, [])
 
-  const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
-    const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
-    if (!findChildren.length) {
-      const required = data.data.required
+  const testClick = (_event: React.MouseEvent, data: MyObject) => {
+    const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
+    if(findChildren){
       const itemChildren = [
-        ...data.data.children.map((item: MyObject) => {
+        ...findChildren.map((item: MyObject) => {
           return {
             id: item.id,
-            type: item?.children?.length ? 'default' : 'output',
-            data: {
-              label: item.name,
-              required: item.required,
-              children: item.children,
-              parent: item.parent,
-              description: item.description,
-              title: item.title,
-              examples: item.examples,
-            },
+            type: 'default',
+            parent: item.parent,
+            data: item.data,
             style: { padding: 10, background: '#1E293B', color: 'white' },
             sourcePosition: 'right',
             targetPosition: 'left',
@@ -162,10 +141,53 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
         ...itemChildren.map((item) => {
           return {
             id: String(Math.floor(Math.random() * 1000000)),
-            source: item?.data?.parent,
+            source: item?.parent,
             target: item?.id,
             animated: true,
-            style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
+            // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
+          }
+        }),
+      ]
+      const newNodes = nodes.concat(itemChildren)
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
+      setNodes([...layoutedNodes])
+      setEdges([...layoutedEdges])
+      if (itemChildren.length > 3) {
+        focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
+      }
+    }
+  }
+
+  const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
+    const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
+    if (!findChildren.length) {
+      const required = data.data.required
+      const itemChildren = [
+        ...data.data.children.map((item: MyObject) => {
+          return {
+            id: item.id,
+            parent: item.parent,
+            // type: item?.children?.length ? 'default' : 'output',
+            data: item.data,
+            style: { padding: 10, background: '#1E293B', color: 'white' },
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            draggable: false,
+          }
+        }),
+      ]
+      const newEdges = [
+        ...edges,
+        ...itemChildren.map((item) => {
+          return {
+            id: String(Math.floor(Math.random() * 1000000)),
+            source: item?.parent,
+            target: item?.id,
+            animated: true,
+            // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
             markerEnd: {
               type: MarkerType.ArrowClosed,
             },
@@ -180,7 +202,7 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
         focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
       }
     } else {
-      const newNodes = removeChildren(data.data, nodes)
+      const newNodes = removeChildren(data, nodes)
       setNodes([...newNodes])
       setEdges([...edges.filter((item) => data.id !== item.source)])
     }
@@ -208,8 +230,8 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
         connectionLineType={ConnectionLineType.SmoothStep}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={handleNodeClick}
-        onNodeMouseEnter={handleMouseEnter}
+        onNodeClick={testClick}
+        // onNodeMouseEnter={handleMouseEnter}
         fitView
         defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
       />
@@ -218,8 +240,8 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, passNodes, tree, title }: NodeProps) => (
+export default ({ setCurrentNode, passNodes, title, rNodes, rEdges }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} title={title} passNodes={passNodes} tree={tree} />
+    <Nodes setCurrentNode={setCurrentNode} title={title} passNodes={passNodes} rNodes={rNodes} rEdges={rEdges} />
   </ReactFlowProvider>
 )

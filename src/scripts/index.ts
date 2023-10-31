@@ -4,7 +4,7 @@ import buildTree from "./buildtree.js";
 
 export const startBuild = async (schema: any) => {
     try {
-        const tree: any = buildTree(schema);
+        const tree: any = await buildTree(schema);
         return tree
         // return writeFileSync(
         //     resolve(__dirname, `../configs`, `${version}.json`),

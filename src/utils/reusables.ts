@@ -1,3 +1,53 @@
+const position = { x: 0, y: 0 };
+
+export function extractProps(schema:any, nodes:any, parent:any){
+  if(typeof schema === 'object'){
+    for (let property in schema){
+      console.log(schema[property])
+      const id = String(Math.floor(Math.random() * 1000000));
+      schema[property].parent = parent
+      schema[property].id = id 
+      nodes.push({
+        id: id,
+        position,
+        parent: parent,
+        data: {
+          label: property
+        }
+      })
+    }
+  }
+}
+
+export function extractAdditionalProps(schema:any, nodes:any, parent:any){
+  const arrayOfProps = schema?.oneOf || schema?.anyOf
+  if(arrayOfProps){
+    extractArrayProps(arrayOfProps, nodes, parent)
+  }else{
+    console.log(schema)
+    // extractProps(schema, nodes, parent)
+  }
+}
+
+export function extractArrayProps(props: any, nodes:any, parent:any){
+  for (let i = 0; i < props.length; i++) {
+    if (props[i].$ref) {
+      const id = String(Math.floor(Math.random() * 1000000));
+      props[i].id = id;
+      props[i].parent = parent;
+      const newRef = props[i]['$ref'].split('/').slice(-1)[0]
+      const title = newRef.split('.')[0]
+      nodes.push({
+        id: id,
+        position,
+        parent: parent,
+        data: {
+          label: title
+        }
+      })
+    }
+  }
+}
 
 function removeByAttr(arr: any[], attr:string, value:string) {
   var i = arr.length;
