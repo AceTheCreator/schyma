@@ -111,20 +111,33 @@ function removeByAttr(arr: any[], attr:string, value:string) {
   }
   return arr;
 }
-
-export function removeChildren(parentNode: any, nodes: any) {
-  let newNodes = nodes;
-  const children = parentNode.children;
-  if (children.length > 0) {
-    for (let i = 0; i < children.length; i++) {
-      newNodes = removeByAttr(nodes, "id", children[i].id);
-      if (children[i].children.length > 0) {
-        removeChildren(children[i], newNodes);
-      }
-    }
+export function removeElementsByParent(array: any, parent:any) {
+  const filteredArray = array.filter((item: any) => item.parent !== parent);
+  const children = array.filter((item:any) => item.parent === parent);
+  
+  for (const child of children) {
+    console.log(child.id)
+    removeElementsByParent(filteredArray, child.id)
   }
-  return newNodes;
+
+  return filteredArray;
 }
+// export function removeElementsByParent(nodes: any, id: any) {
+//   const result = [];
+//   for (const item of nodes) {
+//     if (item.parent !== id) {
+//       result.push(item);
+//     }else{
+//       removeElementsByParent(result, item.id)
+//     }
+//     // } else {
+//     //   // Recursively remove elements related to the current item
+//     //   result.push(...removeElementsByParent(nodes, item.id));
+//     // }
+//   }
+//   return result;
+// }
+
 
 export function retrieveObj(theObject: any, key: string | undefined) {
   var result:any = null;

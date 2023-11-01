@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import { removeChildren } from '../utils/reusables'
+import { removeChildren, removeElementsByParent } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -117,8 +117,11 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
 
   const testClick = (_event: React.MouseEvent, data: MyObject) => {
     if(nodeState?.node === data.id){
-      setNodes([...nodes.filter((node: any) => node.parent !== data.id)])
-      setEdges([...edges.filter((item) => data.id !== item.source)])
+      const res:any = removeElementsByParent(nodes, data.id);
+      console.log(res)
+      // setNodes([...res])
+      // setNodes([...nodes.filter((node: any) => node.parent !== data.id)])
+      // setEdges([...edges.filter((item) => data.id !== item.source)])
       setNodeState({})
     }else{
       const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
