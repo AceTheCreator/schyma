@@ -29,6 +29,9 @@ function Serval({ title, description, schema }: Default) {
       id: '1',
       type: 'input',
       data: { label: 'input' },
+      relations: {
+        0: 'node'
+      },
       position,
     },
   ];

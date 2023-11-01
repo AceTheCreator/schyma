@@ -118,8 +118,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
   const testClick = (_event: React.MouseEvent, data: MyObject) => {
     if(nodeState?.node === data.id){
       const res:any = removeElementsByParent(nodes, data.id);
-      console.log(res)
-      // setNodes([...res])
+      setNodes(res)
       // setNodes([...nodes.filter((node: any) => node.parent !== data.id)])
       // setEdges([...edges.filter((item) => data.id !== item.source)])
       setNodeState({})
@@ -133,6 +132,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
               type: 'default',
               parent: item.parent,
               data: item.data,
+              relations: item.relations,
               style: { padding: 10, background: '#1E293B', color: 'white' },
               sourcePosition: 'right',
               targetPosition: 'left',

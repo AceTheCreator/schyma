@@ -9,10 +9,23 @@ export function extractProps(schema:any, nodes:any, parent:any){
       const id = String(Math.floor(Math.random() * 1000000));
       schema[property].parent = parent.id
       schema[property].id = id 
+      let relations = {};
+      if(parent.relations){
+        relations = {
+          ...parent.relations,
+          [parent.id]: 'node'
+        }
+      }else{
+        relations = {
+          [parent.id] :'node'
+        }
+      }
+      schema[property].relations = relations
       nodes.push({
         id: id,
         position,
         parent: parent.id,
+        relations,
         data: {
           label: property
         }
@@ -34,10 +47,23 @@ export function extractAdditionalProps(schema:any, nodes:any, parent:any){
       const id = String(Math.floor(Math.random() * 1000000));
       schema.parent = parent.id;
       schema.id = id
+      let relations = {};
+      if(parent.relations){
+        relations = {
+          ...parent.relations,
+          [parent.id]: 'node'
+        }
+      }else{
+        relations = {
+          [parent.id] :'node'
+        }
+      }
+      schema.relations = relations
       nodes.push({
         id: id,
         position,
         parent: parent.id,
+        relations,
         data: {
           label: title
         }
@@ -58,9 +84,22 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
       props[i].id = id;
       props[i].parent = parent.id;
       const title = nameFromRef(props[i].$ref);
+      let relations = {};
+      if(parent.relations){
+        relations = {
+          ...parent.relations,
+          [parent.id]: 'node'
+        }
+      }else{
+        relations = {
+          [parent.id] :'node'
+        }
+      }
+      props[i].relations = relations
       nodes.push({
         id: id,
         position,
+        relations,
         parent: parent.id,
         data: {
           label: title
@@ -82,10 +121,22 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
         const id = String(Math.floor(Math.random() * 1000000));
         props[i].id = id;
         props[i].parent = parent.id;
-        
+        let relations = {};
+        if(parent.relations){
+          relations = {
+            ...parent.relations,
+            [parent.id]: 'node'
+          }
+        }else{
+          relations = {
+            [parent.id] :'node'
+          }
+        }
+        props[i].relations = relations
         nodes.push({
           id: id,
           position,
+          relations,
           parent: parent.id,
           data: {
             label: `${title}Object`
@@ -111,32 +162,34 @@ function removeByAttr(arr: any[], attr:string, value:string) {
   }
   return arr;
 }
-export function removeElementsByParent(array: any, parent:any) {
-  const filteredArray = array.filter((item: any) => item.parent !== parent);
-  const children = array.filter((item:any) => item.parent === parent);
-  
-  for (const child of children) {
-    console.log(child.id)
-    removeElementsByParent(filteredArray, child.id)
-  }
-
-  return filteredArray;
-}
-// export function removeElementsByParent(nodes: any, id: any) {
-//   const result = [];
-//   for (const item of nodes) {
-//     if (item.parent !== id) {
-//       result.push(item);
-//     }else{
-//       removeElementsByParent(result, item.id)
+// export function removeElementsByParent(array: any, parent:any) {
+//   const filteredArray = array.filter((item: any) => {
+//     if(item?.relations){
+//       const items = item.relations;
+//       if(items.hasOwnProperty(parent)){
+//         return;
+//       }else{
+//         return item
+//       }
 //     }
-//     // } else {
-//     //   // Recursively remove elements related to the current item
-//     //   result.push(...removeElementsByParent(nodes, item.id));
-//     // }
-//   }
-//   return result;
+//   });
+//   return filteredArray;
 // }
+export function removeElementsByParent(nodes: any, id: any) {
+  const result = nodes.filter((node: any) => {
+    if(node.relations){
+      const rel = node.relations;
+      if(rel.hasOwnProperty(id)){
+        return;
+      }else{
+        return node;
+      }
+    }
+    return node
+  });
+
+  return result;
+}
 
 
 export function retrieveObj(theObject: any, key: string | undefined) {
