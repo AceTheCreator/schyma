@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import ReactFlow, {
   useNodesState,
@@ -93,6 +93,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges);
+  const [nodeState, setNodeState] = useState<any>({});
 
   const onConnect = useCallback(
     (connection: Connection) =>
@@ -114,99 +115,101 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
     setCenter(x, y, { zoom, duration: 1000 })
   }
 
-  useEffect(() => {
-    console.log(layoutedNodes)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const testClick = (_event: React.MouseEvent, data: MyObject) => {
-    const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
-    if(findChildren){
-      const itemChildren = [
-        ...findChildren.map((item: MyObject) => {
-          return {
-            id: item.id,
-            type: 'default',
-            parent: item.parent,
-            data: item.data,
-            style: { padding: 10, background: '#1E293B', color: 'white' },
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            draggable: false,
-          }
-        }),
-      ]
-      const newEdges = [
-        ...edges,
-        ...itemChildren.map((item) => {
-          return {
-            id: String(Math.floor(Math.random() * 1000000)),
-            source: item?.parent,
-            target: item?.id,
-            animated: true,
-            // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-            },
-          }
-        }),
-      ]
-      const newNodes = nodes.concat(itemChildren)
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
-      setNodes([...layoutedNodes])
-      setEdges([...layoutedEdges])
-      if (itemChildren.length > 3) {
-        focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
+    if(nodeState?.node === data.id){
+      setNodes([...nodes.filter((node: any) => node.parent !== data.id)])
+      setEdges([...edges.filter((item) => data.id !== item.source)])
+      setNodeState({})
+    }else{
+      const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
+      if(findChildren){
+        const itemChildren = [
+          ...findChildren.map((item: MyObject) => {
+            return {
+              id: item.id,
+              type: 'default',
+              parent: item.parent,
+              data: item.data,
+              style: { padding: 10, background: '#1E293B', color: 'white' },
+              sourcePosition: 'right',
+              targetPosition: 'left',
+              draggable: false,
+            }
+          }),
+        ]
+        const newEdges = [
+          ...edges,
+          ...itemChildren.map((item) => {
+            return {
+              id: String(Math.floor(Math.random() * 1000000)),
+              source: item?.parent,
+              target: item?.id,
+              animated: true,
+              // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+              },
+            }
+          }),
+        ]
+        const newNodes = nodes.concat(itemChildren)
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
+        setNodes([...layoutedNodes])
+        setEdges([...layoutedEdges])
+        if (itemChildren.length > 3) {
+          focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
+        }
       }
+      setNodeState({node: data.id})
     }
   }
 
-  const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
-    const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
-    if (!findChildren.length) {
-      const required = data.data.required
-      const itemChildren = [
-        ...data.data.children.map((item: MyObject) => {
-          return {
-            id: item.id,
-            parent: item.parent,
-            // type: item?.children?.length ? 'default' : 'output',
-            data: item.data,
-            style: { padding: 10, background: '#1E293B', color: 'white' },
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            draggable: false,
-          }
-        }),
-      ]
-      const newEdges = [
-        ...edges,
-        ...itemChildren.map((item) => {
-          return {
-            id: String(Math.floor(Math.random() * 1000000)),
-            source: item?.parent,
-            target: item?.id,
-            animated: true,
-            // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-            },
-          }
-        }),
-      ]
-      const newNodes = nodes.concat(itemChildren)
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
-      setNodes([...layoutedNodes])
-      setEdges([...layoutedEdges])
-      if (itemChildren.length > 3) {
-        focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
-      }
-    } else {
-      const newNodes = removeChildren(data, nodes)
-      setNodes([...newNodes])
-      setEdges([...edges.filter((item) => data.id !== item.source)])
-    }
-  }
+  // const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
+  //   const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
+  //   if (!findChildren.length) {
+  //     const required = data.data.required
+  //     const itemChildren = [
+  //       ...data.data.children.map((item: MyObject) => {
+  //         return {
+  //           id: item.id,
+  //           parent: item.parent,
+  //           // type: item?.children?.length ? 'default' : 'output',
+  //           data: item.data,
+  //           style: { padding: 10, background: '#1E293B', color: 'white' },
+  //           sourcePosition: 'right',
+  //           targetPosition: 'left',
+  //           draggable: false,
+  //         }
+  //       }),
+  //     ]
+  //     const newEdges = [
+  //       ...edges,
+  //       ...itemChildren.map((item) => {
+  //         return {
+  //           id: String(Math.floor(Math.random() * 1000000)),
+  //           source: item?.parent,
+  //           target: item?.id,
+  //           animated: true,
+  //           // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
+  //           markerEnd: {
+  //             type: MarkerType.ArrowClosed,
+  //           },
+  //         }
+  //       }),
+  //     ]
+  //     const newNodes = nodes.concat(itemChildren)
+  //     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
+  //     setNodes([...layoutedNodes])
+  //     setEdges([...layoutedEdges])
+  //     if (itemChildren.length > 3) {
+  //       focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
+  //     }
+  //   } else {
+  //     const newNodes = removeChildren(data, nodes)
+  //     setNodes([...newNodes])
+  //     setEdges([...edges.filter((item) => data.id !== item.source)])
+  //   }
+  // }
   function handleMouseEnter(_e: any, data: Node) {
     setCurrentNode(data)
     passNodes(nodes)

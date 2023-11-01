@@ -5,7 +5,6 @@ import { useState } from "react";
 import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
-import { startBuild } from "../scripts";
 import traverse from 'json-schema-traverse'
 import { resolveRef, deepCopy, extractProps, extractAdditionalProps, extractArrayProps } from "../utils/reusables";
 
@@ -52,10 +51,6 @@ function Serval({ title, description, schema }: Default) {
           }
           if(schema.items && schema?.id){
             let items = schema.items;
-            // if(items.oneOf){
-            //   console.log(items)
-            //   console.log(schema)
-            // }
             extractAdditionalProps(items, rN, schema)
           }
           if (schema.$ref && schema.$ref !== '#') {

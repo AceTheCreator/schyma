@@ -77,6 +77,8 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
         extractProps(properties, nodes, parent)
       }
       if(props[i].oneOf){
+        // create title from parent ref
+        const title = nameFromRef(parent.$ref);
         const id = String(Math.floor(Math.random() * 1000000));
         props[i].id = id;
         props[i].parent = parent.id;
@@ -86,40 +88,12 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
           position,
           parent: parent.id,
           data: {
-            label: 'messageObject'
+            label: `${title}Object`
           }
         });
-        extractArrayProps(props[i].oneOf, nodes, {id: id})
+        // extractArrayProps(props[i].oneOf, nodes, {id: id})
       }
     }
-    // else{
-    //   const children = props[i]
-    //   const properties = children?.properties
-    //   console.log(properties)
-    //   if (props[i]?.oneOf) {
-    //     console.log(props[i])
-    //     const title = "test"
-    //     const a = props[i].oneOf
-    //     for (let i = 0; i < a.length; i++) {
-    //       const id = String(Math.floor(Math.random() * 1000000));
-    //       a[i].id = id;
-    //       a[i].parent = parent;
-    //       nodes.push({
-    //         id: id,
-    //         position,
-    //         parent: parent,
-    //         data: {
-    //           label: title
-    //         }
-    //       })
-    //       // newProperty[title] = children.oneOf && children.oneOf[i]
-    //       // newProperty[title].parent = parent
-    //       // newProperty[title].name = title
-    //       // newProperty[title].id = String(Math.floor(Math.random() * 1000000))
-    //       // newProperty[title].children = []
-    //     }
-    //   }
-    // }
   }
 }
 
