@@ -40,29 +40,44 @@ function Serval({ title, description, schema }: Default) {
     const validate = ajv.validateSchema(schema);
       if (validate) {
         if(schema.properties){
-          extractProps(schema.properties, rN, '1')
+          extractProps(schema.properties, rN, {id: '1'})
         }
         function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
           visitedSchemas.add(schema)
           if(schema.oneOf){
             if(schema?.id){
               const items = schema.oneOf
-              extractArrayProps(items, rN, schema.id)
+              extractArrayProps(items, rN, schema)
             }
+          }
+          if(schema.items && schema?.id){
+            let items = schema.items;
+            // if(items.oneOf){
+            //   console.log(items)
+            //   console.log(schema)
+            // }
+            extractAdditionalProps(items, rN, schema)
           }
           if (schema.$ref && schema.$ref !== '#') {
             const resolvedSchema = resolveRef(schema.$ref, rootSchema);
             const copied = deepCopy(resolvedSchema);
-
+            if(copied?.oneOf && schema?.id){
+              const items = copied.oneOf
+              extractArrayProps(items, rN, schema)
+            }
+            if(copied?.allOf && schema?.id){
+              extractArrayProps(copied.allOf, rN, schema)
+            }
             if(copied?.additionalProperties){
               if(schema.id){
-                extractAdditionalProps(copied.additionalProperties, rN, schema.id)
+                extractAdditionalProps(copied.additionalProperties, rN, schema)
               }    
             }
-            if(copied?.properties){
-              if(schema.id){
-                extractProps(copied.properties, rN, schema.id)
-              }
+            if(copied?.patternProperties && schema?.id){
+              extractProps(copied.patternProperties, rN, schema)
+            }
+            if(copied?.properties && schema?.id){
+                extractProps(copied.properties, rN, schema)
             }
             Object.assign(schema, copied);
           }

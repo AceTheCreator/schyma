@@ -3,14 +3,16 @@ const position = { x: 0, y: 0 };
 export function extractProps(schema:any, nodes:any, parent:any){
   if(typeof schema === 'object'){
     for (let property in schema){
-      console.log(schema[property])
+      if(typeof schema[property] === 'string' || typeof schema[property] === 'boolean'){
+        schema[property] = {}
+      }
       const id = String(Math.floor(Math.random() * 1000000));
-      schema[property].parent = parent
+      schema[property].parent = parent.id
       schema[property].id = id 
       nodes.push({
         id: id,
         position,
-        parent: parent,
+        parent: parent.id,
         data: {
           label: property
         }
@@ -24,9 +26,29 @@ export function extractAdditionalProps(schema:any, nodes:any, parent:any){
   if(arrayOfProps){
     extractArrayProps(arrayOfProps, nodes, parent)
   }else{
-    console.log(schema)
-    // extractProps(schema, nodes, parent)
+    if(typeof schema === 'object' && schema.type !== 'string' && schema.type !== 'array'){
+      let title = '';
+      if(schema.$ref){
+        title = nameFromRef(schema.$ref)
+      }
+      const id = String(Math.floor(Math.random() * 1000000));
+      schema.parent = parent.id;
+      schema.id = id
+      nodes.push({
+        id: id,
+        position,
+        parent: parent.id,
+        data: {
+          label: title
+        }
+      })
+    }
   }
+}
+
+function nameFromRef(string: string){
+  const newRef =  string.split('/').slice(-1)[0]
+  return  newRef.split('.')[0]
 }
 
 export function extractArrayProps(props: any, nodes:any, parent:any){
@@ -34,18 +56,70 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
     if (props[i].$ref) {
       const id = String(Math.floor(Math.random() * 1000000));
       props[i].id = id;
-      props[i].parent = parent;
-      const newRef = props[i]['$ref'].split('/').slice(-1)[0]
-      const title = newRef.split('.')[0]
+      props[i].parent = parent.id;
+      const title = nameFromRef(props[i].$ref);
       nodes.push({
         id: id,
         position,
-        parent: parent,
+        parent: parent.id,
         data: {
           label: title
         }
       })
+    }else{
+      const children = props[i]
+      const patterns = children?.patternProperties
+      const properties = children?.properties
+      if(patterns){
+        extractProps(patterns, nodes, parent)
+      }
+      if(properties){
+        extractProps(properties, nodes, parent)
+      }
+      if(props[i].oneOf){
+        const id = String(Math.floor(Math.random() * 1000000));
+        props[i].id = id;
+        props[i].parent = parent.id;
+        
+        nodes.push({
+          id: id,
+          position,
+          parent: parent.id,
+          data: {
+            label: 'messageObject'
+          }
+        });
+        extractArrayProps(props[i].oneOf, nodes, {id: id})
+      }
     }
+    // else{
+    //   const children = props[i]
+    //   const properties = children?.properties
+    //   console.log(properties)
+    //   if (props[i]?.oneOf) {
+    //     console.log(props[i])
+    //     const title = "test"
+    //     const a = props[i].oneOf
+    //     for (let i = 0; i < a.length; i++) {
+    //       const id = String(Math.floor(Math.random() * 1000000));
+    //       a[i].id = id;
+    //       a[i].parent = parent;
+    //       nodes.push({
+    //         id: id,
+    //         position,
+    //         parent: parent,
+    //         data: {
+    //           label: title
+    //         }
+    //       })
+    //       // newProperty[title] = children.oneOf && children.oneOf[i]
+    //       // newProperty[title].parent = parent
+    //       // newProperty[title].name = title
+    //       // newProperty[title].id = String(Math.floor(Math.random() * 1000000))
+    //       // newProperty[title].children = []
+    //     }
+    //   }
+    // }
   }
 }
 
