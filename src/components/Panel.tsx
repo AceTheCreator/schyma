@@ -12,7 +12,6 @@ type Props = {
 
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<Node>()
-  const [activeLabel, setActiveLabel] = useState('');
   const [children, setChildren] = useState<any>([]);
   useEffect(() => {
     if(nodes?.length){
@@ -29,22 +28,6 @@ function Panel({ node, nodes, title, description }: Props) {
       }
     }
   },[node])
-  // useEffect(() => {
-  //   if (node?.data && node.data?.children.length > 0) {
-  //     setView(node)
-  //   } else {
-  //     // whenever this condition is true, update the node to the parent node
-  //     // any current node
-  //     if (nodes) {
-  //       const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.parent)
-  //       setView(findParent[0])
-  //     }
-  //     if (activeLabel !== node?.data?.label) {
-  //       setActiveLabel(node?.data?.label)
-  //       3
-  //     }
-  //   }
-  // }, [node])
 
   if (view && Object.keys(view).length > 0) {
     const nodeData = view.data

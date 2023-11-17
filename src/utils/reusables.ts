@@ -226,6 +226,7 @@ export function retrieveObj(theObject: any, key: string | undefined) {
 }
 
 export function resolveRef(ref: string, rootSchema: any) {
+  
   // Assuming the ref is a local reference within the same schema
   const refPath: string[] = ref.substring(1).split('/') // Remove the leading '#' and split the path
   let resolvedSchema = rootSchema
