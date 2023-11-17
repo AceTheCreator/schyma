@@ -46,6 +46,7 @@ function Serval({ title, description, schema }: Default) {
         }
         function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
           visitedSchemas.add(schema)
+
           if(schema.oneOf){
             if(schema?.id){
               const items = schema.oneOf
@@ -55,6 +56,16 @@ function Serval({ title, description, schema }: Default) {
           if(schema.items && schema?.id){
             let items = schema.items;
             extractAdditionalProps(items, rN, schema)
+          }
+          if(schema?.additionalProperties){
+            if(schema.id){
+              extractAdditionalProps(schema.additionalProperties, rN, schema)
+            }    
+          }
+          if(schema?.patternProperties){
+            if(schema.id){
+              extractProps(schema.patternProperties, rN, schema)
+            }
           }
           if (schema.$ref && schema.$ref !== '#') {
             const resolvedSchema = resolveRef(schema.$ref, rootSchema);
@@ -81,10 +92,6 @@ function Serval({ title, description, schema }: Default) {
           }
         }
         traverse(schema, { cb: callbackFn });
-        console.log(schema)
-      // const res: any = await startBuild(schema)
-      // console.log(res)
-      // setTree(res)
     }
     }
     build(schema)
@@ -99,7 +106,7 @@ function Serval({ title, description, schema }: Default) {
   },[rNodes])
   return (
     <div>
-      {tree ?       <div className="body-wrapper">
+      {tree ? <div className="body-wrapper">
         <div className="node-container">
         <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} rEdges={rEdges} title={title} />
         </div>

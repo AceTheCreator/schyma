@@ -119,8 +119,6 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
     if(nodeState?.node === data.id){
       const res:any = removeElementsByParent(nodes, data.id);
       setNodes(res)
-      // setNodes([...nodes.filter((node: any) => node.parent !== data.id)])
-      // setEdges([...edges.filter((item) => data.id !== item.source)])
       setNodeState({})
     }else{
       const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
@@ -129,9 +127,10 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
           ...findChildren.map((item: MyObject) => {
             return {
               id: item.id,
-              type: 'default',
+              type: item.data?.$ref || item.data?.items || item.data?.properties || item.data?.additionalProperties || item.data?.patternProperties || item.data?.oneOf ? 'default' : 'output' ,
               parent: item.parent,
               data: item.data,
+              position,
               relations: item.relations,
               style: { padding: 10, background: '#1E293B', color: 'white' },
               sourcePosition: 'right',
@@ -167,52 +166,6 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
     }
   }
 
-  // const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
-  //   const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
-  //   if (!findChildren.length) {
-  //     const required = data.data.required
-  //     const itemChildren = [
-  //       ...data.data.children.map((item: MyObject) => {
-  //         return {
-  //           id: item.id,
-  //           parent: item.parent,
-  //           // type: item?.children?.length ? 'default' : 'output',
-  //           data: item.data,
-  //           style: { padding: 10, background: '#1E293B', color: 'white' },
-  //           sourcePosition: 'right',
-  //           targetPosition: 'left',
-  //           draggable: false,
-  //         }
-  //       }),
-  //     ]
-  //     const newEdges = [
-  //       ...edges,
-  //       ...itemChildren.map((item) => {
-  //         return {
-  //           id: String(Math.floor(Math.random() * 1000000)),
-  //           source: item?.parent,
-  //           target: item?.id,
-  //           animated: true,
-  //           // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
-  //           markerEnd: {
-  //             type: MarkerType.ArrowClosed,
-  //           },
-  //         }
-  //       }),
-  //     ]
-  //     const newNodes = nodes.concat(itemChildren)
-  //     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
-  //     setNodes([...layoutedNodes])
-  //     setEdges([...layoutedEdges])
-  //     if (itemChildren.length > 3) {
-  //       focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
-  //     }
-  //   } else {
-  //     const newNodes = removeChildren(data, nodes)
-  //     setNodes([...newNodes])
-  //     setEdges([...edges.filter((item) => data.id !== item.source)])
-  //   }
-  // }
   function handleMouseEnter(_e: any, data: Node) {
     setCurrentNode(data)
     passNodes(nodes)
