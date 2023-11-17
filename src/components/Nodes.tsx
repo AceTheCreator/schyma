@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import ReactFlow, {
   useNodesState,
@@ -73,12 +73,11 @@ type MyObject = { [x: string]: any }
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
-  passNodes: (node: any) => void
   initialNode: Node[]
   rNodes: any,
 }
 
-const Nodes = ({ setCurrentNode, passNodes, rNodes, initialNode, }: NodeProps) => {
+const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
@@ -157,9 +156,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, initialNode, }: NodeProps) =
   }
 
   function handleMouseEnter(_e: any, data: Node) {
-    console.log(data)
     setCurrentNode(data)
-    passNodes(nodes)
   }
   const edgeTypes = {
     smart: SmartBezierEdge,
@@ -190,8 +187,8 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, initialNode, }: NodeProps) =
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, passNodes, rNodes, initialNode }: NodeProps) => (
+export default ({ setCurrentNode, rNodes, initialNode }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} initialNode={initialNode} />
+    <Nodes setCurrentNode={setCurrentNode} rNodes={rNodes} initialNode={initialNode} />
   </ReactFlowProvider>
 )

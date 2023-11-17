@@ -18,8 +18,7 @@ interface Default {
 function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
-  const [nodes, passNodes] = useState<Node[]>();
-  const [rNodes, setNodes] = useState(null);
+  const [nodes, setNodes] = useState(null);
   const [tree, setTree] = useState(false);
   const position = { x: 0, y: 0 };
   const visitedSchemas = new Set();
@@ -34,7 +33,6 @@ function Serval({ title, description, schema }: Default) {
       position,
     },
   ];
-  const rE: any = [];
   useEffect(() => {
     // validate schema
     async function build(schema: JSONSchema7Object) {
@@ -98,15 +96,15 @@ function Serval({ title, description, schema }: Default) {
   }, [])
 
   useEffect(() => {
-    if(rNodes){
+    if(nodes){
       setTree(true)
     }
-  },[rNodes])
+  },[nodes])
   return (
     <div>
       {tree ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} initialNode={rN[0]} />
+        <Nodes setCurrentNode={setCurrentNode} rNodes={nodes} initialNode={rN[0]} />
         </div>
         <Panel
           title={title}

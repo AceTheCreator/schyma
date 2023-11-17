@@ -24,12 +24,12 @@ function Tables({ nodes, active }: Children) {
                 </thead>
                 <tbody>
                     {nodes.map((node: NodeType) => {
-                        return <tr key={node.name} className={`panel_table-wrapper_tbody ${active?.id === node.id ? "panel_table-wrapper_tbody_active" : ""}`}>
+                        return <tr key={node.id} className={`panel_table-wrapper_tbody ${active?.id === node.id ? "panel_table-wrapper_tbody_active" : ""}`}>
                             <th scope="">
-                                {node.name}
+                                {node.data?.label}
                             </th>
                             <td>
-                                {node.description}
+                                {node.data?.schema?.description}
                             </td>
                         </tr>
                     })}

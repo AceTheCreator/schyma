@@ -5,7 +5,7 @@ import Tables from './Tables'
 
 type Props = {
   node: Node | undefined
-  nodes: Node[] | undefined
+  nodes: Node[] | undefined | null
   title: string
   description: string
 }
@@ -13,9 +13,20 @@ type Props = {
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<Node>()
   const [activeLabel, setActiveLabel] = useState('');
+  const [children, setChildren] = useState<any>([]);
   useEffect(() => {
-    if(node?.data){
-      setView(node)
+    if(nodes?.length){
+      const findChildren = nodes?.filter((item: any) => item?.parent === node?.id)
+      if(findChildren.length){
+        setChildren(findChildren);
+        setView(node)
+      }else{
+        const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.schema.parent)
+        const newNode = findParent[0]
+        const findChildren = nodes?.filter((item: any) => item?.parent === newNode?.id)
+        setView(newNode)
+        setChildren(findChildren);
+      }
     }
   },[node])
   // useEffect(() => {
@@ -42,7 +53,7 @@ function Panel({ node, nodes, title, description }: Props) {
         <h1>{nodeData.title || nodeData.label}</h1>
         <p>{nodeData.description || nodeData?.schema.description}</p>
 
-        {/* <Tables nodes={nodeData.children} active={node} /> */}
+        {children.length > 0 && <Tables nodes={children} active={node} />}
 
         {nodeData?.schema?.examples && (
           <div className='examples-wrapper'>
