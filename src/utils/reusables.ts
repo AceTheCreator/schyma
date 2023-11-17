@@ -28,7 +28,7 @@ export function extractProps(schema:any, nodes:any, parent:any){
         relations,
         data: {
           label: property,
-          ...schema[property]
+          schema: schema[property]
         }
       })
     }
@@ -68,7 +68,7 @@ export function extractAdditionalProps(schema:any, nodes:any, parent:any){
         relations,
         data: {
           label: title,
-          ...schema
+          schema: schema
         }
       })
     }
@@ -106,7 +106,7 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
         parent: parent.id,
         data: {
           label: title,
-          ...props[i]
+          schema: props[i]
         }
       })
     }else{
@@ -144,7 +144,7 @@ export function extractArrayProps(props: any, nodes:any, parent:any){
           parent: parent.id,
           data: {
             label: `${title}Object`,
-            ...props[i]
+            schema: props[i]
           }
         });
         // extractArrayProps(props[i].oneOf, nodes, {id: id})

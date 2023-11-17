@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import { removeChildren, removeElementsByParent } from '../utils/reusables'
+import {removeElementsByParent } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -33,15 +33,6 @@ const initialEdges = [
     },
   },
 ];
-
-const initialNodes = [
-    {
-      id: '1',
-      type: 'input',
-      data: { label: 'input' },
-      position,
-    },
-]
 
 
 const dagreGraph = new dagre.graphlib.Graph()
@@ -83,13 +74,12 @@ type MyObject = { [x: string]: any }
 type NodeProps = {
   setCurrentNode: (node: Node) => void
   passNodes: (node: any) => void
-  title: string,
+  initialNode: Node[]
   rNodes: any,
-  rEdges: any
 }
 
-const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) => {
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(initialNodes, initialEdges)
+const Nodes = ({ setCurrentNode, passNodes, rNodes, initialNode, }: NodeProps) => {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges);
@@ -127,7 +117,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
           ...findChildren.map((item: MyObject) => {
             return {
               id: item.id,
-              type: item.data?.$ref || item.data?.items || item.data?.properties || item.data?.additionalProperties || item.data?.patternProperties || item.data?.oneOf ? 'default' : 'output' ,
+              type: item.data?.schema?.$ref || item.data?.schema?.items || item.data?.schema?.properties || item.data?.schema?.additionalProperties || item.data?.schema?.patternProperties || item.data?.schema?.oneOf ? 'default' : 'output' ,
               parent: item.parent,
               data: item.data,
               position,
@@ -167,6 +157,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
   }
 
   function handleMouseEnter(_e: any, data: Node) {
+    console.log(data)
     setCurrentNode(data)
     passNodes(nodes)
   }
@@ -190,7 +181,7 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={testClick}
-        // onNodeMouseEnter={handleMouseEnter}
+        onNodeMouseEnter={handleMouseEnter}
         fitView
         defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
       />
@@ -199,8 +190,8 @@ const Nodes = ({ setCurrentNode, passNodes, rNodes, rEdges, title }: NodeProps) 
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, passNodes, title, rNodes, rEdges }: NodeProps) => (
+export default ({ setCurrentNode, passNodes, rNodes, initialNode }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} title={title} passNodes={passNodes} rNodes={rNodes} rEdges={rEdges} />
+    <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} initialNode={initialNode} />
   </ReactFlowProvider>
 )

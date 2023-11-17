@@ -12,37 +12,42 @@ type Props = {
 
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<Node>()
-  const [activeLabel, setActiveLabel] = useState('')
+  const [activeLabel, setActiveLabel] = useState('');
   useEffect(() => {
-    if (node?.data && node.data?.children.length > 0) {
+    if(node?.data){
       setView(node)
-    } else {
-      // whenever this condition is true, update the node to the parent node
-      // any current node
-      if (nodes) {
-        const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.parent)
-        setView(findParent[0])
-      }
-      if (activeLabel !== node?.data?.label) {
-        setActiveLabel(node?.data?.label)
-        3
-      }
     }
-  }, [node])
+  },[node])
+  // useEffect(() => {
+  //   if (node?.data && node.data?.children.length > 0) {
+  //     setView(node)
+  //   } else {
+  //     // whenever this condition is true, update the node to the parent node
+  //     // any current node
+  //     if (nodes) {
+  //       const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.parent)
+  //       setView(findParent[0])
+  //     }
+  //     if (activeLabel !== node?.data?.label) {
+  //       setActiveLabel(node?.data?.label)
+  //       3
+  //     }
+  //   }
+  // }, [node])
 
   if (view && Object.keys(view).length > 0) {
     const nodeData = view.data
     return (
       <div className='panel'>
         <h1>{nodeData.title || nodeData.label}</h1>
-        <p>{nodeData.description}</p>
+        <p>{nodeData.description || nodeData?.schema.description}</p>
 
-        <Tables nodes={nodeData.children} active={node} />
+        {/* <Tables nodes={nodeData.children} active={node} /> */}
 
-        {nodeData.examples && (
+        {nodeData?.schema?.examples && (
           <div className='examples-wrapper'>
             <h1>Examples</h1>
-            {nodeData.examples.map((example: any) => (
+            {nodeData?.schema?.examples.map((example: any) => (
               <CodeComponent key={example.title}>{JSON.stringify(example, null, 2)}</CodeComponent>
             ))}
           </div>

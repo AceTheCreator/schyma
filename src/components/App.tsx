@@ -20,7 +20,6 @@ function Serval({ title, description, schema }: Default) {
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nodes, passNodes] = useState<Node[]>();
   const [rNodes, setNodes] = useState(null);
-  const [rEdges, setEdges] = useState(null);
   const [tree, setTree] = useState(false);
   const position = { x: 0, y: 0 };
   const visitedSchemas = new Set();
@@ -28,7 +27,7 @@ function Serval({ title, description, schema }: Default) {
     {
       id: '1',
       type: 'input',
-      data: { label: 'input' },
+      data: { label: title, description },
       relations: {
         0: 'node'
       },
@@ -96,7 +95,6 @@ function Serval({ title, description, schema }: Default) {
     }
     build(schema)
     setNodes(rN)
-    setEdges(rE)
   }, [])
 
   useEffect(() => {
@@ -108,7 +106,7 @@ function Serval({ title, description, schema }: Default) {
     <div>
       {tree ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} rEdges={rEdges} title={title} />
+        <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} rNodes={rNodes} initialNode={rN[0]} />
         </div>
         <Panel
           title={title}
