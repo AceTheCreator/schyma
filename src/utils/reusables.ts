@@ -1,3 +1,6 @@
+import { Resolver } from "@stoplight/json-ref-resolver";
+import refRes from "@json-schema-tools/reference-resolver";
+
 const position = { x: 0, y: 0 };
 
 export function extractProps(schema:any, nodes:any, parent:any){
@@ -225,8 +228,18 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
+const resolver = new Resolver();
+
+export async function testResolve(ref:any,schema:any){
+  const test = await refRes.resolve(ref, schema);
+  console.log(test)
+  // resolver.resolve(schema, ref).then((res) => {
+  //   console.log('helllo')
+  //   console.log(res)
+  // }).catch((err) => console.log(err))
+}
+
 export function resolveRef(ref: string, rootSchema: any) {
-  
   // Assuming the ref is a local reference within the same schema
   const refPath: string[] = ref.substring(1).split('/') // Remove the leading '#' and split the path
   let resolvedSchema = rootSchema

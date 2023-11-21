@@ -6,7 +6,7 @@ import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import traverse from 'json-schema-traverse'
-import { resolveRef, deepCopy, extractProps, extractAdditionalProps, extractArrayProps } from "../utils/reusables";
+import { resolveRef, deepCopy, extractProps, extractAdditionalProps, extractArrayProps, testResolve } from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -39,8 +39,10 @@ function Serval({ title, description, schema }: Default) {
     const validate = ajv.validateSchema(schema);
       if (validate) {
         if(schema.properties){
+          // testResolve('#/definitions/info', schema)
           extractProps(schema.properties, rN, {id: '1'})
         }
+
         function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
           visitedSchemas.add(schema)
 
