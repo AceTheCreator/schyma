@@ -105,7 +105,6 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
   }
 
   const testClick = (_event: React.MouseEvent, data: MyObject) => {
-    console.log(data)
     if(nodeState?.node === data.id){
       const res:any = removeElementsByParent(nodes, data.id);
       setNodes(res)
