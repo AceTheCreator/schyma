@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {removeElementsByParent } from '../utils/reusables'
+import {nameFromRef, removeElementsByParent } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -105,20 +105,38 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
   }
 
   const testClick = (_event: React.MouseEvent, data: MyObject) => {
+    console.log(data)
+    const props = data.properties;
+    const children = [];
+    for (const prop in props){
+      const id = String(Math.floor(Math.random() * 1000000));
+      props[prop].id = id;
+      props[prop].parent = data.id
+      props[prop].data = {
+        label: prop
+      }
+      children.push(props[prop])
+      if(props[prop].$ref){
+        props[prop].type = "default"
+        // console.log(getLabel)
+        // console.log(props[prop].$ref)
+      }else{
+        props[prop].type = "output"
+      }
+    } 
     if(nodeState?.node === data.id){
       const res:any = removeElementsByParent(nodes, data.id);
       setNodes(res)
       setNodeState({})
     }else{
-      const findChildren = rNodes.filter((item: any) => item?.parent === data.id)
-      if(findChildren){
+      if(children){
         const itemChildren = [
-          ...findChildren.map((item: MyObject) => {
+          ...children.map((item: MyObject) => {
             return {
               id: item.id,
-              type: item.data?.schema?.$ref || item.data?.schema?.items || item.data?.schema?.properties || item.data?.schema?.additionalProperties || item.data?.schema?.patternProperties || item.data?.schema?.oneOf ? 'default' : 'output' ,
+              type: 'default',
               parent: item.parent,
-              data: item.data,
+              data: item,
               position,
               relations: item.relations,
               style: { padding: 10, background: '#1E293B', color: 'white' },
@@ -143,7 +161,7 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
             }
           }),
         ]
-        const newNodes = nodes.concat(itemChildren)
+        const newNodes = nodes.concat(children)
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
         setNodes([...layoutedNodes])
         setEdges([...layoutedEdges])
@@ -178,7 +196,7 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={testClick}
-        onNodeMouseEnter={handleMouseEnter}
+        // onNodeMouseEnter={handleMouseEnter}
         fitView
         defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
       />

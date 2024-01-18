@@ -24,66 +24,29 @@ export async function resolveRef(ref: string, schema: any) {
   // return resolvedSchema
 }
 
-export function deepCopy(obj:any, copiesMap = new WeakMap()) {
-  // If the object is null or not an object, return it as is
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-
-  // If the object has already been copied, return the copy
-  if (copiesMap.has(obj)) {
-    return copiesMap.get(obj);
-  }
-
-  // Create an empty object or array to hold the copied properties
-  const newObj:any = Array.isArray(obj) ? [] : {};
-
-  // Add the new object to the copiesMap before copying properties to handle circular references
-  copiesMap.set(obj, newObj);
-
-  // Copy each property from the original object to the new object
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      newObj[key] = deepCopy(obj[key], copiesMap); // Recursively copy nested objects
-    }
-  }
-
-  return newObj;
-}
 
 const position = { x: 0, y: 0 };
 
-export function extractProps(schema:any, nodes:any, parent:any){
+export async function extractProps(schema:any, nodes:any, parent:any, rootSchema: any){
   if(typeof schema === 'object'){
-    for (let property in schema){
-      if(typeof schema[property] === 'string' || typeof schema[property] === 'boolean'){
-        schema[property] = {}
+    schema.children = [];
+    const id = String(Math.floor(Math.random() * 1000000));
+    const properties = schema.properties;
+    for (const props in properties){
+      if(properties[props].$ref){
+       const res = await resolveRef(properties[props].$ref, rootSchema);
+      }else {
+        schema.children.push({
+          id: id,
+          position,
+          type: 'output',
+          parent: parent.id,
+          data: {
+            label: props,
+            schema: properties[props]
+          }
+        })
       }
-      const id = String(Math.floor(Math.random() * 1000000));
-      schema[property].parent = parent.id
-      schema[property].id = id 
-      let relations = {};
-      if(parent.relations){
-        relations = {
-          ...parent.relations,
-          [parent.id]: 'node'
-        }
-      }else{
-        relations = {
-          [parent.id] :'node'
-        }
-      }
-      schema[property].relations = relations
-      nodes.push({
-        id: id,
-        position,
-        parent: parent.id,
-        relations,
-        data: {
-          label: property,
-          schema: schema[property]
-        }
-      })
     }
   }
 }
@@ -128,7 +91,7 @@ export function extractAdditionalProps(schema:any, nodes:any, parent:any){
   }
 }
 
-function nameFromRef(string: string){
+export function nameFromRef(string: string){
   const newRef =  string.split('/').slice(-1)[0]
   return  newRef.split('.')[0]
 }

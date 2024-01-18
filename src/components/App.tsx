@@ -6,7 +6,7 @@ import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import traverse from 'json-schema-traverse'
-import { resolveRef, deepCopy, extractProps, extractAdditionalProps, extractArrayProps} from "../utils/reusables";
+import { resolveRef, extractProps, extractAdditionalProps, extractArrayProps} from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -26,7 +26,9 @@ function Serval({ title, description, schema }: Default) {
     {
       id: '1',
       type: 'input',
-      data: { label: title, description },
+      data: { label: title },
+      properties: schema.properties,
+      description,
       relations: {
         0: 'node'
       },
@@ -35,69 +37,38 @@ function Serval({ title, description, schema }: Default) {
   ];
 
 
-  useEffect(() => {
-    function build(schema: JSONSchema7Object) {
-      const validate = ajv.validateSchema(schema);
-        if (validate) {
-          if(schema.properties){
-            extractProps(schema.properties, rN, {id: '1'})
-          }
-          function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
-            setTimeout(() => {
-              if(schema.id){
-                if(schema.oneOf && schema.id){
-                  const items = schema.oneOf
-                  extractArrayProps(items, rN, schema)
-              }
-              }
-              if(schema.items && schema?.id){
-                let items = schema.items;
-                extractAdditionalProps(items, rN, schema)
-              }
-              if(schema.additionalProperties && schema.id){
-                extractAdditionalProps(schema.additionalProperties, rN, schema)
-            }
-            if(schema?.patternProperties){
-              if(schema.id){
-                extractProps(schema.patternProperties, rN, schema)
-              }
-            }
-            if (schema.$ref && schema.$ref !== '#') {
-                resolveRef(schema.$ref, rootSchema).then((resolvedSchema) => {
-                  const copied = resolvedSchema;
-                  if(copied?.oneOf && schema?.id){
-                    const items = copied.oneOf
-                    extractArrayProps(items, rN, schema)
-                  }
-                  if(copied?.allOf && schema?.id){
-                    extractArrayProps(copied.allOf, rN, schema)
-                  }
-                  if(copied?.additionalProperties){
-                    if(schema.id){
-                      extractAdditionalProps(copied.additionalProperties, rN, schema)
-                    }    
-                  }
-                  if(copied?.items && schema?.id){
-                    let items = copied.items;
-                    extractAdditionalProps(items, rN, schema)
-                  }
-                  if(copied?.patternProperties && schema?.id){
-                    extractProps(copied.patternProperties, rN, schema)
-                  }
-                  if(copied?.properties && schema?.id){
-                      extractProps(copied.properties, rN, schema)
-                  }
-                });
-            }
-            },0)
-          }
-          traverse(schema, { cb: callbackFn });
-      }
-      }
-    build(schema)
-    setNodes(rN)
-  }, [])
+  // useEffect(() => {
+  //   function build(schema: JSONSchema7Object) {
+  //     const validate = ajv.validateSchema(schema);
+  //       if (validate) {
+  //         if(schema.properties){
+  //           extractProps(schema, rN, {id: '1'}, schema)
+  //         }
+  //         function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
+  //           if(schema.properties){
+  //             extractProps(schema, rN, {id: '1'}, schema)
 
+  //           }
+  //           // if (schema.$ref && schema.$ref !== '#') {
+  //           //     resolveRef(schema.$ref, rootSchema).then((resolvedSchema) => {
+  //           //       const copied = resolvedSchema;
+  //           //       console.log(copied)
+
+  //           //     });
+  //           // }
+  //         }
+  //         traverse(schema, { cb: callbackFn });
+  //     }
+  //     }
+  //   build(schema)
+
+  //   console.log(schema)
+  //   setNodes(rN)
+  // }, [])
+
+  useEffect(() => {
+    setNodes(rN)
+  },[])
   useEffect(() => {
     if(nodes){
       setTree(true)
