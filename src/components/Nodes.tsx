@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {nameFromRef, removeElementsByParent } from '../utils/reusables'
+import {nameFromRef, removeElementsByParent, resolveRef } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -73,11 +73,12 @@ type MyObject = { [x: string]: any }
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
-  initialNode: Node[]
-  rNodes: any,
+  setnChildren: (node: Node) => void
+  initialNode: Node
+  schema: any
 }
 
-const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
+const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
@@ -104,8 +105,12 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
     setCenter(x, y, { zoom, duration: 1000 })
   }
 
-  const testClick = (_event: React.MouseEvent, data: MyObject) => {
-    console.log(data)
+  const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
+    // if(data.$ref){
+    //   const res = await resolveRef(data.$ref, schema);
+    //   console.log(res)
+    //   data.properties = res.properties
+    // }
     const props = data.properties;
     const children = [];
     for (const prop in props){
@@ -173,7 +178,22 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
     }
   }
 
-  function handleMouseEnter(_e: any, data: Node) {
+  async function handleMouseEnter(_e: any, data: Node) {
+    const props = data.properties
+    const nodeProps:any = {}
+    // check if node as description
+    for (const prop in props){
+      if(props[prop].$ref){
+        const res = await resolveRef(props[prop].$ref, schema);
+        nodeProps[prop] = res;
+      }else{
+        nodeProps[prop] = props[prop]
+      }
+    }
+    console.log(data)
+    data.properties = nodeProps;
+    // setnChildren(nodeProps)
+    // // setnChildren()
     setCurrentNode(data)
   }
   const edgeTypes = {
@@ -195,8 +215,8 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
         connectionLineType={ConnectionLineType.SmoothStep}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={testClick}
-        // onNodeMouseEnter={handleMouseEnter}
+        onNodeClick={nodeClick}
+        onNodeMouseEnter={handleMouseEnter}
         fitView
         defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
       />
@@ -205,8 +225,8 @@ const Nodes = ({ setCurrentNode, rNodes, initialNode, }: NodeProps) => {
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, rNodes, initialNode }: NodeProps) => (
+export default ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} rNodes={rNodes} initialNode={initialNode} />
+    <Nodes setCurrentNode={setCurrentNode} setnChildren={setnChildren}  initialNode={initialNode} schema={schema} />
   </ReactFlowProvider>
 )

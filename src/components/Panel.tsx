@@ -11,41 +11,47 @@ type Props = {
 }
 
 function Panel({ node, nodes, title, description }: Props) {
-  const [view, setView] = useState<Node>()
-  const [children, setChildren] = useState<any>([]);
+  const [view, setView] = useState<boolean>()
+  const children = node?.properties;
+
+
   useEffect(() => {
-    if(nodes?.length){
-      const findChildren = nodes?.filter((item: any) => item?.parent === node?.id)
-      if(findChildren.length){
-        setChildren(findChildren);
-        setView(node)
-      }else{
-        const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.schema.parent)
-        const newNode = findParent[0]
-        const findChildren = nodes?.filter((item: any) => item?.parent === newNode?.id)
-        setView(newNode)
-        setChildren(findChildren);
-      }
+    if(node){
+      setView(true);
     }
   },[node])
+  // useEffect(() => {
+  //   if(nodes?.length){
+  //     const findChildren = nodes?.filter((item: any) => item?.parent === node?.id)
+  //     if(findChildren.length){
+  //       setChildren(findChildren);
+  //       setView(node)
+  //     }else{
+  //       const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.schema.parent)
+  //       const newNode = findParent[0]
+  //       const findChildren = nodes?.filter((item: any) => item?.parent === newNode?.id)
+  //       setView(newNode)
+  //       setChildren(findChildren);
+  //     }
+  //   }
+  // },[node])
 
-  if (view && Object.keys(view).length > 0) {
-    const nodeData = view.data
+  if (view) {
     return (
       <div className='panel'>
-        <h1>{nodeData.title || nodeData.label}</h1>
-        <p>{nodeData.description || nodeData?.schema.description}</p>
+        <h1>{node?.data.title || node?.data.label}</h1>
+        <p>{node?.data.description}</p>
 
-        {children.length > 0 && <Tables nodes={children} active={node} />}
+        {children && <Tables nodes={children} active={node} />}
 
-        {nodeData?.schema?.examples && (
+        {/* {nodeData?.schema?.examples && (
           <div className='examples-wrapper'>
             <h1>Examples</h1>
             {nodeData?.schema?.examples.map((example: any) => (
               <CodeComponent key={example.title}>{JSON.stringify(example, null, 2)}</CodeComponent>
             ))}
           </div>
-        )}
+        )} */}
       </div>
     )
   }

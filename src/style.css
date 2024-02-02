@@ -1,10 +1,6 @@
 /* this gets exported as style.css and can be used for the default theming */
 /* these are the necessary styles for React Flow, they get used by base.css and style.css */
 
-.body-wrapper{
-  display: flex;
-  justify-content: space-between;
-}
 
 .node-container{
   width: 60%;
