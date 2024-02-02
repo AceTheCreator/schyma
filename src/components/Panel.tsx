@@ -11,8 +11,9 @@ type Props = {
 }
 
 function Panel({ node, nodes, title, description }: Props) {
+  console.log(nodes)
   const [view, setView] = useState<boolean>()
-  const children = node?.properties;
+  const children = nodes?.properties;
 
 
   useEffect(() => {
@@ -39,8 +40,8 @@ function Panel({ node, nodes, title, description }: Props) {
   if (view) {
     return (
       <div className='panel'>
-        <h1>{node?.data.title || node?.data.label}</h1>
-        <p>{node?.data.description}</p>
+        <h1>{nodes?.data.title || nodes?.data.label}</h1>
+        <p>{nodes?.data.description}</p>
 
         {children && <Tables nodes={children} active={node} />}
 

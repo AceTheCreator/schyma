@@ -78,6 +78,8 @@ type NodeProps = {
   schema: any
 }
 
+const nodeMaps:any = {};
+
 const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
@@ -106,11 +108,10 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
-    // if(data.$ref){
-    //   const res = await resolveRef(data.$ref, schema);
-    //   console.log(res)
-    //   data.properties = res.properties
-    // }
+    if(data.$ref){
+      const res = await resolveRef(data.$ref, schema);
+      data.properties = res.properties
+    }
     const props = data.properties;
     const children = [];
     for (const prop in props){
@@ -179,20 +180,34 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   async function handleMouseEnter(_e: any, data: Node) {
+    if(data.$ref){
+      const res = await resolveRef(data.$ref, schema);
+      data.properties = res.properties
+    }
     const props = data.properties
     const nodeProps:any = {}
     // check if node as description
-    for (const prop in props){
-      if(props[prop].$ref){
-        const res = await resolveRef(props[prop].$ref, schema);
-        nodeProps[prop] = res;
-      }else{
-        nodeProps[prop] = props[prop]
+    if(props){
+      for (const prop in props){
+        if(props[prop].$ref){
+          const res = await resolveRef(props[prop].$ref, schema);
+          nodeProps[prop] = res;
+        }else{
+          nodeProps[prop] = props[prop]
+        }
       }
+      data.properties = nodeProps;
+      if(nodeMaps[data.id]){
+        console.log('exists')
+      }else{
+        nodeMaps[data.id] = data;
+      }
+      setnChildren(data)
+    }else{
+      // check for parent children
+      // console.log(nodeMaps[data.parent])
+      setnChildren(nodeMaps[data.parent])
     }
-    console.log(data)
-    data.properties = nodeProps;
-    // setnChildren(nodeProps)
     // // setnChildren()
     setCurrentNode(data)
   }

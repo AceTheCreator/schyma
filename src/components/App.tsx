@@ -19,7 +19,7 @@ function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nChildren, setnChildren] = useState<any>(null);
-  const [tree, setTree] = useState(true);
+  const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
 
   const initialNode = {
@@ -32,21 +32,26 @@ function Serval({ title, description, schema }: Default) {
     },
     position,
   }
-
+  const validate = ajv.validateSchema(schema);
+  useEffect(() => {
+    if(validate){
+      setRender(true)
+    }
+  },[validate])
   return (
-      <div className="flex">
+    <div>
+      {render ? <div className="body-wrapper">
         <div className="node-container">
-          <h1>Hello</h1>
-        {/* <Nodes setCurrentNode={setCurrentNode} setnChildren={setnChildren} initialNode={initialNode} schema={schema} /> */}
+        <Nodes setCurrentNode={setCurrentNode} setnChildren={setnChildren} initialNode={initialNode} schema={schema} />
         </div>
-        <div>hello</div>
-        {/* <Panel
+        <Panel
           title={title}
           description={description}
           node={currentNode}
           nodes={nChildren}
-        /> */}
-      </div>
+        />
+      </div> : <div>loading</div>}
+    </div>
   );
 }
 
