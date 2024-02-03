@@ -11,7 +11,6 @@ type Props = {
 }
 
 function Panel({ node, nodes, title, description }: Props) {
-  console.log(nodes)
   const [view, setView] = useState<boolean>()
   const children = nodes?.properties;
 
@@ -21,21 +20,6 @@ function Panel({ node, nodes, title, description }: Props) {
       setView(true);
     }
   },[node])
-  // useEffect(() => {
-  //   if(nodes?.length){
-  //     const findChildren = nodes?.filter((item: any) => item?.parent === node?.id)
-  //     if(findChildren.length){
-  //       setChildren(findChildren);
-  //       setView(node)
-  //     }else{
-  //       const findParent = nodes.filter((item: { id: any }) => item?.id == node?.data?.schema.parent)
-  //       const newNode = findParent[0]
-  //       const findChildren = nodes?.filter((item: any) => item?.parent === newNode?.id)
-  //       setView(newNode)
-  //       setChildren(findChildren);
-  //     }
-  //   }
-  // },[node])
 
   if (view) {
     return (

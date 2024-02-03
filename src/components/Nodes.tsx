@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {nameFromRef, removeElementsByParent, resolveRef } from '../utils/reusables'
+import {arrayToProps, nameFromRef, propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -79,6 +79,7 @@ type NodeProps = {
 }
 
 const nodeMaps:any = {};
+const refStorage: any = {};
 
 const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
@@ -108,24 +109,32 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
-    if(data.$ref){
-      const res = await resolveRef(data.$ref, schema);
-      data.properties = res.properties
+    // if(data.$ref){
+    //   const res = await resolveRef(data.$ref, schema);
+    //   data.properties = res.properties
+    // }
+    let props = data.properties;
+    const label = data?.data.label;
+    if(label && refStorage[label]){
+      if(label === data.parentLabel && refStorage[`${label}child`]){
+        props = refStorage[`${label}child`].properties
+        console.log(refStorage[`${label}child`])
+      }else{
+        props = refStorage[label].properties
+      }
     }
-    const props = data.properties;
     const children = [];
     for (const prop in props){
       const id = String(Math.floor(Math.random() * 1000000));
       props[prop].id = id;
       props[prop].parent = data.id
+      props[prop].parentLabel = label;
       props[prop].data = {
         label: prop
       }
       children.push(props[prop])
-      if(props[prop].$ref){
+      if(props[prop].$ref || props[prop].oneOf || props[prop].items){
         props[prop].type = "default"
-        // console.log(getLabel)
-        // console.log(props[prop].$ref)
       }else{
         props[prop].type = "output"
       }
@@ -179,21 +188,70 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
     }
   }
 
-  async function handleMouseEnter(_e: any, data: Node) {
-    if(data.$ref){
-      const res = await resolveRef(data.$ref, schema);
-      data.properties = res.properties
+  function extractArrProps(props:any, label: string){
+    const arrProps = arrayToProps(props);
+    if(refStorage[label]){
+      // console.log(refStorage[label])
+      // refStorage[label].properties = arrProps
+    }else{
+      refStorage[label] = {
+        properties: arrProps
+      };
     }
-    const props = data.properties
+    return arrProps
+  }
+
+  function extractOtherPropTypes(data:any, label:string){
+    let properties
+    if(data.parentLabel === label){
+      properties = refStorage[`${label}child`].properties
+    }else{
+      if(data.oneOf){
+        const propRes = extractArrProps(data.oneOf, label)
+        properties = propRes
+      }
+      if(data.items){
+        const {items} = data;
+        if(items.oneOf){
+          const propRes = extractArrProps(items.oneOf, label)
+          properties = propRes
+        }
+      }
+      if(label && refStorage[label]){
+        const mergedProp = propMerge(refStorage[label])
+        properties = mergedProp
+        if(JSON.stringify(refStorage[label].properties) !== JSON.stringify(mergedProp) ){
+          refStorage[label].properties = mergedProp
+        }
+      }
+    }
+    return properties
+  }
+
+  async function handleMouseEnter(_e: any, data: Node) {
+    let props = data.properties
+    const label = data?.data.label;
+    const getProperties = extractOtherPropTypes(data, label);
+    
+    if(getProperties){
+      props = getProperties
+   }
     const nodeProps:any = {}
     // check if node as description
     if(props){
       for (const prop in props){
         if(props[prop].$ref){
           const res = await resolveRef(props[prop].$ref, schema);
+          if(prop === label){
+            const newProp = `${prop}child`
+            refStorage[newProp] = res
+          }else{
+            refStorage[prop] = res;
+          }
           nodeProps[prop] = res;
-        }else{
-          nodeProps[prop] = props[prop]
+        }
+        else{
+          nodeProps[prop] = props[prop];
         }
       }
       data.properties = nodeProps;
@@ -204,11 +262,8 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
       }
       setnChildren(data)
     }else{
-      // check for parent children
-      // console.log(nodeMaps[data.parent])
       setnChildren(nodeMaps[data.parent])
     }
-    // // setnChildren()
     setCurrentNode(data)
   }
   const edgeTypes = {

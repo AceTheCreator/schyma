@@ -9,7 +9,6 @@ interface Children {
 }
 
 function Tables({ nodes, active }: Children) {
-    console.log(active)
     return (
         <div className="panel_table-wrapper">
             <table>
@@ -34,16 +33,6 @@ function Tables({ nodes, active }: Children) {
                             </td>
                         </tr>
                     })}
-                    {/* {Object.keys((node: NodeType) => {
-                        return <tr key={node.id} className={`panel_table-wrapper_tbody ${active?.id === node.id ? "panel_table-wrapper_tbody_active" : ""}`}>
-                            <th scope="">
-                                {node.data?.label}
-                            </th>
-                            <td>
-                                {node.data?.schema?.description}
-                            </td>
-                        </tr>
-                    })} */}
         </tbody>
     </table>
 </div>
