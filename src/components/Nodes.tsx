@@ -109,12 +109,9 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
-    // if(data.$ref){
-    //   const res = await resolveRef(data.$ref, schema);
-    //   data.properties = res.properties
-    // }
     let props = data.properties;
     const label = data?.data.label;
+    console.log(refStorage[label])
     if(label && refStorage[label]){
       if(label === data.parentLabel && refStorage[`${label}child`]){
         props = refStorage[`${label}child`].properties
@@ -133,7 +130,7 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         label: prop
       }
       children.push(props[prop])
-      if(props[prop].$ref || props[prop].oneOf || props[prop].items){
+      if(props[prop].$ref || props[prop].oneOf || props[prop].items || props[prop].patternProperties ){
         props[prop].type = "default"
       }else{
         props[prop].type = "output"
@@ -206,6 +203,9 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
     if(data.parentLabel === label){
       properties = refStorage[`${label}child`].properties
     }else{
+      // if(data.patternProperties){
+      //   properties = data.patternProperties
+      // }
       if(data.oneOf){
         const propRes = extractArrProps(data.oneOf, label)
         properties = propRes
@@ -251,12 +251,16 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
           nodeProps[prop] = res;
         }
         else{
+          //:TODO: Add support for resolved object for children
+          if(props[prop].patternProperties){
+            refStorage[prop] = props[prop]
+          }
           nodeProps[prop] = props[prop];
         }
       }
       data.properties = nodeProps;
       if(nodeMaps[data.id]){
-        console.log('exists')
+        console.log(nodeMaps[data.id])
       }else{
         nodeMaps[data.id] = data;
       }

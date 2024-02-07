@@ -13,14 +13,17 @@ export function nameFromRef(string: string){
 
 export function propMerge(schema: any){
   let mergedProps = {};
-  const {properties, additionalProperties, items, oneOf} = schema;
+  const {properties, patternProperties, additionalProperties, items, oneOf} = schema;
   const arrWithObject = additionalProperties || items
 
   const arrExtractor = (items:any) => {
     const props = arrayToProps(items)
     mergedProps = {...mergedProps, ...props}
   }
-
+  if(schema.patternProperties){
+    console.log(schema.patternProperties)
+    mergedProps = {...patternProperties}
+  }
   if(schema.properties){
     mergedProps = {...properties}
   }
@@ -30,7 +33,7 @@ export function propMerge(schema: any){
     }
   }
   if(oneOf){
-    arrExtractor(arrWithObject.oneOf)
+    arrExtractor(oneOf)
   }
   return mergedProps
 }
