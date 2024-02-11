@@ -21,7 +21,6 @@ export function propMerge(schema: any){
     mergedProps = {...mergedProps, ...props}
   }
   if(schema.patternProperties){
-    console.log(schema.patternProperties)
     mergedProps = {...patternProperties}
   }
   if(schema.properties){

@@ -111,13 +111,16 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
     let props = data.properties;
     const label = data?.data.label;
-    console.log(refStorage[label])
-    if(label && refStorage[label]){
-      if(label === data.parentLabel && refStorage[`${label}child`]){
-        props = refStorage[`${label}child`].properties
-        console.log(refStorage[`${label}child`])
-      }else{
-        props = refStorage[label].properties
+    const newLabel = `${label}${data.parentLabel}`
+    if(refStorage[newLabel]){
+      props = refStorage[newLabel].properties
+    }else{
+      if(label && refStorage[label]){
+        if(label === data.parentLabel && refStorage[`${label}child`]){
+          props = refStorage[`${label}child`].properties
+        }else{
+          props = refStorage[label].properties
+        }
       }
     }
     const children = [];
@@ -185,12 +188,19 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
     }
   }
 
-  function extractArrProps(props:any, label: string){
+  function extractArrProps(props:any, label: any){
     const arrProps = arrayToProps(props);
     if(refStorage[label]){
       // console.log(refStorage[label])
       // refStorage[label].properties = arrProps
     }else{
+      // if(label === "^[\\w\\d\\.\\-_]+$" ){
+      //   refStorage[`$`]    
+      // }else{
+      //   refStorage[label] = {
+      //     properties: arrProps
+      //   };
+      // }
       refStorage[label] = {
         properties: arrProps
       };
@@ -203,9 +213,6 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
     if(data.parentLabel === label){
       properties = refStorage[`${label}child`].properties
     }else{
-      // if(data.patternProperties){
-      //   properties = data.patternProperties
-      // }
       if(data.oneOf){
         const propRes = extractArrProps(data.oneOf, label)
         properties = propRes
@@ -217,6 +224,14 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
           properties = propRes
         }
       }
+      const newLabel = `${label}${data.parentLabel}`
+      if(refStorage[newLabel]){
+        const mergedProp = propMerge(refStorage[newLabel])
+        properties = mergedProp
+        if(JSON.stringify(refStorage[newLabel].properties) !== JSON.stringify(mergedProp) ){
+          refStorage[newLabel].properties = mergedProp
+        }
+    }else{
       if(label && refStorage[label]){
         const mergedProp = propMerge(refStorage[label])
         properties = mergedProp
@@ -225,16 +240,16 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         }
       }
     }
+    }
     return properties
   }
 
   async function handleMouseEnter(_e: any, data: Node) {
-    let props = data.properties
     const label = data?.data.label;
+    let props = data.properties
     const getProperties = extractOtherPropTypes(data, label);
-    
     if(getProperties){
-      props = getProperties
+      props = {...props, ...getProperties}
    }
     const nodeProps:any = {}
     // check if node as description
@@ -252,15 +267,14 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         }
         else{
           //:TODO: Add support for resolved object for children
-          if(props[prop].patternProperties){
-            refStorage[prop] = props[prop]
-          }
+          const propName = `${prop}${label}`;
+          refStorage[propName] = props[prop]
           nodeProps[prop] = props[prop];
         }
       }
       data.properties = nodeProps;
       if(nodeMaps[data.id]){
-        console.log(nodeMaps[data.id])
+        console.log('ldf')
       }else{
         nodeMaps[data.id] = data;
       }
