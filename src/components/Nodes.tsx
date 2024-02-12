@@ -14,7 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {arrayToProps, nameFromRef, propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
+import {arrayToProps, propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
 
 
 const position = { x: 0, y: 0 };
@@ -191,16 +191,7 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   function extractArrProps(props:any, label: any){
     const arrProps = arrayToProps(props);
     if(refStorage[label]){
-      // console.log(refStorage[label])
-      // refStorage[label].properties = arrProps
     }else{
-      // if(label === "^[\\w\\d\\.\\-_]+$" ){
-      //   refStorage[`$`]    
-      // }else{
-      //   refStorage[label] = {
-      //     properties: arrProps
-      //   };
-      // }
       refStorage[label] = {
         properties: arrProps
       };
@@ -246,6 +237,10 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
 
   async function handleMouseEnter(_e: any, data: Node) {
     const label = data?.data.label;
+    // const propName = `${label}${data.parentName}`;
+    // if(refStorage[propName]){
+    //   console.log(refStorage[propName])
+    // }
     let props = data.properties
     const getProperties = extractOtherPropTypes(data, label);
     if(getProperties){
@@ -253,7 +248,7 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
    }
     const nodeProps:any = {}
     // check if node as description
-    if(props){
+    if(props && Object.keys(props).length > 0){
       for (const prop in props){
         if(props[prop].$ref){
           const res = await resolveRef(props[prop].$ref, schema);

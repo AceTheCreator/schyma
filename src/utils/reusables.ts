@@ -21,10 +21,10 @@ export function propMerge(schema: any){
     mergedProps = {...mergedProps, ...props}
   }
   if(schema.patternProperties){
-    mergedProps = {...patternProperties}
+    mergedProps = {...mergedProps,...patternProperties}
   }
   if(schema.properties){
-    mergedProps = {...properties}
+    mergedProps = {...mergedProps, ...properties}
   }
   if(arrWithObject){
     if(arrWithObject.oneOf){
@@ -34,6 +34,7 @@ export function propMerge(schema: any){
   if(oneOf){
     arrExtractor(oneOf)
   }
+  console.log(mergedProps)
   return mergedProps
 }
 
