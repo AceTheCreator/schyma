@@ -1,6 +1,6 @@
 import React from 'react';
 import { Node } from 'reactflow';
-import { NodeType } from '../types/nodes';
+import { NodeType } from '../types';
 
 
 interface Children {

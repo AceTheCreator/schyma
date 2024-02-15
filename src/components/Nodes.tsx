@@ -236,11 +236,8 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   async function handleMouseEnter(_e: any, data: Node) {
+    console.log(data)
     const label = data?.data.label;
-    // const propName = `${label}${data.parentName}`;
-    // if(refStorage[propName]){
-    //   console.log(refStorage[propName])
-    // }
     let props = data.properties
     const getProperties = extractOtherPropTypes(data, label);
     if(getProperties){

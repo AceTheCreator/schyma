@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import CodeComponent from './Code'
 import { Node } from 'reactflow'
 import Tables from './Tables'
 

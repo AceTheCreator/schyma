@@ -34,7 +34,6 @@ export function propMerge(schema: any){
   if(oneOf){
     arrExtractor(oneOf)
   }
-  console.log(mergedProps)
   return mergedProps
 }
 
