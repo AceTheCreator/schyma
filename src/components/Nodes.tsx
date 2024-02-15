@@ -109,9 +109,10 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
   }
 
   const nodeClick = async (_event: React.MouseEvent, data: MyObject) => {
-    let props = data.properties;
     const label = data?.data.label;
+    let props = data.properties;
     const newLabel = `${label}${data.parentLabel}`
+    const nodeProps:any = {}
     if(refStorage[newLabel]){
       props = refStorage[newLabel].properties
     }else{
@@ -123,6 +124,17 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         }
       }
     }
+
+    if(props){
+      for(let prop in props){
+        if(refStorage[prop]){
+          nodeProps[prop] = refStorage[prop]
+        }else{
+          nodeProps[prop] = props[prop]
+        }
+      }
+      props = nodeProps
+    }
     const children = [];
     for (const prop in props){
       const id = String(Math.floor(Math.random() * 1000000));
@@ -133,7 +145,7 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         label: prop
       }
       children.push(props[prop])
-      if(props[prop].$ref || props[prop].oneOf || props[prop].items || props[prop].patternProperties ){
+      if(props[prop].oneOf || props[prop].items || props[prop].patternProperties || props[prop].additionalProperties  ){
         props[prop].type = "default"
       }else{
         props[prop].type = "output"
@@ -235,11 +247,11 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
     return properties
   }
 
-  async function handleMouseEnter(_e: any, data: Node) {
-    console.log(data)
-    const label = data?.data.label;
+  async function handleMouseEnter(_e: any, node: Node) {
+    const data = node.data;
+    const label = node?.data.label;
     let props = data.properties
-    const getProperties = extractOtherPropTypes(data, label);
+    const getProperties = extractOtherPropTypes(node, label);
     if(getProperties){
       props = {...props, ...getProperties}
    }
@@ -265,16 +277,16 @@ const Nodes = ({ setCurrentNode, setnChildren, initialNode, schema }: NodeProps)
         }
       }
       data.properties = nodeProps;
-      if(nodeMaps[data.id]){
+      if(nodeMaps[node.id]){
         console.log('ldf')
       }else{
-        nodeMaps[data.id] = data;
+        nodeMaps[node.id] = node;
       }
-      setnChildren(data)
+      setnChildren(node)
     }else{
-      setnChildren(nodeMaps[data.parent])
+      setnChildren(nodeMaps[node.parent])
     }
-    setCurrentNode(data)
+    setCurrentNode(node)
   }
   const edgeTypes = {
     smart: SmartBezierEdge,

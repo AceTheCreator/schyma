@@ -25,11 +25,9 @@ function Serval({ title, description, schema }: Default) {
   const initialNode = {
     id: '1',
     type: 'input',
-    data: { label: title, description},
-    properties: schema.properties,
-    relations: {
+    data: { label: title, description, properties: schema.properties,     relations: {
       0: 'node'
-    },
+    },},
     position,
   }
   const validate = ajv.validateSchema(schema);

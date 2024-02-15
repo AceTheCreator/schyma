@@ -24,7 +24,7 @@ function Panel({ node, nodes, title, description }: Props) {
     return (
       <div className='panel'>
         <h1>{nodes?.data.title || nodes?.data.label}</h1>
-        <p>{nodes?.data.description}</p>
+        <p>{nodes?.data.description || nodes?.description}</p>
 
         {children && <Tables nodes={children} active={node} />}
 
