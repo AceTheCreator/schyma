@@ -5,8 +5,6 @@ import { useState } from "react";
 import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
-import traverse from 'json-schema-traverse'
-import { resolveRef, extractProps, extractAdditionalProps, extractArrayProps} from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -18,16 +16,14 @@ interface Default {
 function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
-  const [nChildren, setnChildren] = useState<any>(null);
+  const [nodeMaps, setNodeMaps] = useState<any>({});
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
 
   const initialNode = {
     id: '1',
     type: 'input',
-    data: { label: title, description, properties: schema.properties,     relations: {
-      0: 'node'
-    },},
+    data: { label: title, description, properties: schema.properties, relations: {},},
     position,
   }
   const validate = ajv.validateSchema(schema);
@@ -40,13 +36,13 @@ function Serval({ title, description, schema }: Default) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes setCurrentNode={setCurrentNode} setnChildren={setnChildren} initialNode={initialNode} schema={schema} />
+        <Nodes nodeMaps={nodeMaps} setCurrentNode={setCurrentNode} setNodeMaps={setNodeMaps} initialNode={initialNode} schema={schema} />
         </div>
         <Panel
           title={title}
           description={description}
           node={currentNode}
-          nodes={nChildren}
+          nodes={nodeMaps}
         />
       </div> : <div>loading</div>}
     </div>

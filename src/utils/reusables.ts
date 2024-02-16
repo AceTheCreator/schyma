@@ -50,9 +50,9 @@ export function arrayToProps (props: any) {
 
 export function removeElementsByParent(nodes: any, id: any) {
   const result = nodes.filter((node: any) => {
-    if(node.relations){
-      const rel = node.relations;
-      if(rel.hasOwnProperty(id)){
+    const relations = node.data.relations;
+    if(relations){
+      if(relations.hasOwnProperty(id)){
         return;
       }else{
         return node;
@@ -93,18 +93,17 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   return result;
 }
 
-export function checkRefExists(obj: any, ref: string) {
-
-  if (obj && obj.$ref && obj.$ref === ref) {
-    delete obj.$ref;
-    return obj;
+export function typeCheck(data: any): boolean {
+  switch (true) {
+    case !!data.oneOf:
+    case !!data.anyOf:
+    case !!data.allOf:
+    case !!data.items:
+    case !! data.patternProperties:
+    case data.additionalProperties !== undefined && data.additionalProperties !== true:
+    case data.additionalItems !== undefined && data.additionalItems !== true:
+      return true;
+    default:
+      return false;
   }
-
-  for (const key in obj) {
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-       checkRefExists(obj[key], ref) 
-    }
-  }
-
-  return false;
 }

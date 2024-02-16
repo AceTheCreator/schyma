@@ -4,27 +4,34 @@ import Tables from './Tables'
 
 type Props = {
   node: Node | undefined
-  nodes: Node[] | undefined | null
+  nodes: any
   title: string
   description: string
 }
 
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<boolean>()
-  const children = nodes?.properties;
-
-
+  const [children, setChildren] = useState(null);
+  const [activeNode, setActiveNode] = useState<Node| undefined>(node)
+  const data = node?.data;
   useEffect(() => {
     if(node){
       setView(true);
+      if(data.properties){
+        setChildren(data.properties);
+        setActiveNode(node);
+      }else{
+        setActiveNode(nodes[data.parent])
+        setChildren(nodes[data.parent].data.properties);
+      }
     }
   },[node])
 
   if (view) {
     return (
       <div className='panel'>
-        <h1>{nodes?.data.title || nodes?.data.label}</h1>
-        <p>{nodes?.data.description || nodes?.description}</p>
+        <h1>{activeNode?.data.title || activeNode?.data.label}</h1>
+        <p>{activeNode?.data.description}</p>
 
         {children && <Tables nodes={children} active={node} />}
 
