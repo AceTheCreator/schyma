@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import ReactFlow, {
   useNodesState,
@@ -14,8 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {arrayToProps, propMerge, removeElementsByParent, resolveRef, typeCheck } from '../utils/reusables'
-
+import {arrayToProps, propMerge, removeChildren, removeElementsByParent, resolveRef, typeCheck } from '../utils/reusables'
 
 const position = { x: 0, y: 0 };
 
@@ -36,6 +35,7 @@ const initialEdges: [Edge] = [
 
 
 const dagreGraph = new dagre.graphlib.Graph()
+
 dagreGraph.setDefaultEdgeLabel(() => ({}))
 
 const nodeWidth = 172
@@ -48,14 +48,9 @@ const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => 
   dagreGraph.setGraph({ rankdir: direction })
 
   nodes.forEach(node => {
-    dagreGraph.removeNode(node.id); // Remove the node from the graph
-    // Add the node back to the graph with default or undefined position
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
-  // nodes.forEach((node: any) => {
-  //   dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
-  // })
 
   edges.forEach((edge: any) => {
     dagreGraph.setEdge(edge.source, edge.target)
@@ -69,10 +64,9 @@ const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => 
     node.targetPosition = isHorizontal ? 'left' : 'top'
     node.sourcePosition = isHorizontal ? 'right' : 'bottom'
     node.position = {
-      x: nodeWithPosition.x - nodeWidth / 2,
-      y: nodeWithPosition.y - nodeHeight / 2,
+      x: nodeWithPosition.x - nodeWidth / 3,
+      y: nodeWithPosition.y - nodeHeight / 3,
     }
-    console.log(node.position)
     return node
   })
 
@@ -91,6 +85,7 @@ type NodeProps = {
 
 
 const refStorage: any = {};
+
 
 const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
@@ -119,102 +114,98 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
     setCenter(x, y, { zoom, duration: 1000 })
   }
 
-  const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
-    if(nodeState[node.id]){
-      const res:any = removeElementsByParent(nodes, node.id);
-      setNodes(res)
-      setNodeState({});
-    }else{
-      const data = node.data
-      const label = data.label;
-      let props = data.properties;
-      const newLabel = `${label}${data.parentLabel}`
-      const nodeProps:any = {};
-      if(refStorage[newLabel]){
-        props = refStorage[newLabel].properties
+
+  let initialNodes: MyObject = [initialNode];
+
+  const extractChildren = async (props, parent) => {
+    const children = [];
+    for(const prop in props){
+      const id = String(Math.floor(Math.random() * 1000000));
+      if(props[prop].$ref){
+        const res = await resolveRef(props[prop].$ref, schema);
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]})
       }else{
-        if(label && refStorage[label]){
-          if(label === data.parentLabel && refStorage[`${label}child`]){
-            props = refStorage[`${label}child`].properties
-          }else{
-            props = refStorage[label].properties
-          }
-        }
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]})
       }
-  
-      if(props){
-        for(let prop in props){
-          if(refStorage[prop]){
-            nodeProps[prop] = refStorage[prop]
-          }else{
-            nodeProps[prop] = props[prop]
-          }
-        }
-        props = nodeProps
-      }
-      const children: any = [];
-      for (const prop in props){
-        const id = String(Math.floor(Math.random() * 1000000));
-        const newProp = {
-          id: id,
-          data: {
-            ...props[prop],
-            label: prop,
-            parent: node.id,
-            parentLabel: label,
-            relations: {
-              ...data.relations,
-              [node.id]: 'node'
-            }
-          },
-          type: "output",
-        }
-        const checkNodeType = typeCheck(newProp.data)
-        if(checkNodeType){
-          newProp.type = "default"
-        }
-        children.push(newProp)
-      }
-      if(children){
-        const itemChildren = [
-          ...children.map((item: MyObject) => {
-           return {
-              id: item.id,
-              data: item.data,
-              style: { padding: 10, background: '#1E293B', color: 'white' },
-              sourcePosition: 'right',
-              targetPosition: 'left',
-              position,
-              draggable: false,
-            }
-          }),
-        ]
-        const newEdges:any = [
-          ...edges,
-          ...itemChildren.map((item) => {
-            return {
-              id: String(Math.floor(Math.random() * 1000000)),
-              source: item?.data.parent,
-              target: item?.id,
-              animated: true,
-              // style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-              },
-            }
-          }),
-        ]
-        const newNodes: any = nodes.concat(children)
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
-        setNodes([...layoutedNodes])
-        setEdges([...layoutedEdges])
-        if (itemChildren.length > 3) {
-          focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
-        }
-      }
-      setNodeState({...nodeState, [node.id]: 'node'})
     }
+    return children;
   }
+
+  useEffect(() => {
+    const newNodes:any = [];
+    initialNodes.map(async (item) => {
+      const children = await extractChildren(item.properties, item);
+      newNodes.push({
+        id: item.id,
+        type: "default",
+        data: {
+          children,
+          label: item.label,
+          description: item.description,
+          properties: {...item.properties},
+          relations: item.relations
+        },
+        position: { x: 0, y: 0 },
+        sourcePosition: "right",
+        targetPosition: "left",
+      })
+    })
+    setNodes(newNodes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
+    console.log(node)
+    const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
+    if (!findChildren.length) {
+      const itemChildren = [
+        ...node.data.children.map((item: MyObject) => {
+          // console.log(item)
+          const eChildren = extractChildren(item.properties || item.addtionalProperties, item);
+          return {
+            id: item.id,
+            type: item?.children?.length ? "default" : "output",
+            data: {
+              label: item.label,
+              children: eChildren,
+              // children: item.children.length > 0 ? item.children : eChildren,
+              parent: item.parent,
+              description: item.description,
+              relations: item.relations,
+            },
+            sourcePosition: "right",
+            targetPosition: "left",
+            draggable: false,
+          };
+        }),
+      ];
+      const newEdges = [
+        ...edges,
+        ...itemChildren.map((item) => {
+          return {
+            id: String(Math.floor(Math.random() * 1000000)),
+            source: item?.data?.parent,
+            target: item?.id,
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
+          };
+        }),
+      ];
+      const newNodes = nodes.concat(itemChildren);
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(newNodes, newEdges, "LR");
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+      // if (itemChildren.length) {
+      //   focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9);
+      // }
+    } else {
+      const newNodes = removeElementsByParent(nodes, node.id);
+      setNodes([...newNodes]);
+      // setEdges([...edges.filter((item) => data.id !== item.source)]);
+    }
+    }
 
   function extractArrProps(props:any, label: any){
     const arrProps = arrayToProps(props);
@@ -265,7 +256,7 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
 
   async function handleMouseEnter(_e: any, node: Node) {
     const data = node.data;
-    const label = node?.data.label;
+    const label = data.label;
     if(!nodeMaps[node.id]){
       let props = data.properties
       const getProperties = extractOtherPropTypes(data, label);

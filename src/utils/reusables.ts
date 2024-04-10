@@ -107,3 +107,33 @@ export function typeCheck(data: any): boolean {
       return false;
   }
 }
+
+function removeByAttr(arr: any[], attr:string, value:string) {
+  var i = arr.length;
+  while (i--) {
+    if (
+      arr[i] &&
+      arr[i].hasOwnProperty(attr) &&
+      arguments.length > 2 &&
+      arr[i][attr] === value
+    ) {
+      arr.splice(i, 1);
+    }
+  }
+  return arr;
+}
+
+export function removeChildren(parentNode: any, nodes: any) {
+  let newNodes = nodes;
+  const children = parentNode.children;
+  if (children.length > 0) {
+    for (let i = 0; i < children.length; i++) {
+      newNodes = removeByAttr(nodes, "id", children[i].id);
+      console.log(newNodes)
+      if (children[i].children.length > 0) {
+        removeChildren(children[i], newNodes);
+      }
+    }
+  }
+  return newNodes;
+}
