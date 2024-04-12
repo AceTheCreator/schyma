@@ -77,8 +77,8 @@ type MyObject = { [x: string]: any }
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
-  setNodeMaps: (node: Node) => void
-  nodeMaps: any
+  setnNodes: any
+  nNodes: { [x: string]: Node}
   initialNode: Node
   schema: any
 }
@@ -87,7 +87,7 @@ type NodeProps = {
 const refStorage: any = {};
 
 
-const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: NodeProps) => {
+const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
@@ -157,35 +157,28 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
   const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
-      const itemChildren:any = [];
-      await Promise.all(
-        node.data.children.map(async (item: MyObject) => {
-          let children = [];
-          if(item.properties){
-            const eChildren = await extractChildren(item.properties, item);
-            children = eChildren
-          }
-          itemChildren.push({
-            id: item.id,
-            type: children?.length > 0 ? "default" : "output",
-            data: {
-              label: item.label,
-              children: children,
-              // children: item.children.length > 0 ? item.children : eChildren,
-              parent: item.parent,
-              description: item.description,
-              relations: item.relations,
-            },
-            sourcePosition: "right",
-            targetPosition: "left",
-            draggable: false,
-          })
-          // console.log(item.parent)
-        })
-      )
+      // const itemChildren:any = [];
+      // node.data.children.map((item:Node) => {
+      //   const children = item?.children;
+      //   itemChildren.push({
+      //     id: item.id,
+      //     type: children?.length > 0 ? "default" : "output",
+      //     data: {
+      //       label: item.label,
+      //       children: children,
+      //       // children: item.children.length > 0 ? item.children : eChildren,
+      //       parent: item.parent,
+      //       description: item.description,
+      //       relations: item.relations,
+      //     },
+      //     sourcePosition: "right",
+      //     targetPosition: "left",
+      //     draggable: false,
+      //   })
+      // })
       const newEdges = [
         ...edges,
-        ...itemChildren.map((item) => {
+        ...node.data.children.map((item:Node) => {
           return {
             id: String(Math.floor(Math.random() * 1000000)),
             source: item?.data?.parent,
@@ -196,7 +189,7 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
           };
         }),
       ];
-      const newNodes = nodes.concat(itemChildren);
+      const newNodes = nodes.concat(node.data.children);
       const { nodes: layoutedNodes, edges: layoutedEdges } =
         getLayoutedElements(newNodes, newEdges, "LR");
       setNodes([...layoutedNodes]);
@@ -260,41 +253,69 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
   }
 
   async function handleMouseEnter(_e: any, node: Node) {
-    console.log(node)
     const data = node.data;
     const label = data.label;
-    if(!nodeMaps[node.id]){
-      let props = data.properties;
-      const getProperties = extractOtherPropTypes(data, label);
-      console.log(getProperties)
-      if(getProperties){
-        props = {...props, ...getProperties}
-     }
-      const nodeProps:any = {}
-      // check if node as description
-      if(props && Object.keys(props).length > 0){
-        for (const prop in props){
-          if(props[prop].$ref){
-            const res = await resolveRef(props[prop].$ref, schema);
-            if(prop === label){
-              const newProp = `${prop}child`
-              refStorage[newProp] = res
-            }else{
-              refStorage[prop] = res;
-            }
-            nodeProps[prop] = res;
+    if(!nNodes[node.id]){
+      const itemChildren:any = [];
+      await Promise.all(
+        node.data.children.map(async (item: MyObject) => {
+          let children = [];
+          const extractProps = propMerge(item);
+          if(Object.keys(extractProps).length > 0){
+            const res = await extractChildren(extractProps, item);
+            children = res;
           }
-          else{
-            //:TODO: Add support for resolved object for children
-            const propName = `${prop}${label}`;
-            refStorage[propName] = props[prop]
-            nodeProps[prop] = props[prop];
-          }
-        }
-        data.properties = nodeProps;
-        nodeMaps[node.id] = node;
-        setNodeMaps(nodeMaps)
-      }
+          itemChildren.push({
+            id: item.id,
+            type: children?.length > 0 ? "default" : "output",
+            data: {
+              label: item.label,
+              children: children,
+              parent: item.parent,
+              description: item.description,
+              relations: item.relations,
+            },
+            sourcePosition: "right",
+            targetPosition: "left",
+            draggable: false,
+          })
+          // console.log(item.parent)
+        })
+      )
+      node.data.children = itemChildren;
+      nNodes[node.id] = node;
+        setnNodes(nNodes)
+    //   let props = data.properties;
+    //   const getProperties = extractOtherPropTypes(data, label);
+    //   console.log(getProperties)
+    //   if(getProperties){
+    //     props = {...props, ...getProperties}
+    //  }
+    //   const nodeProps:any = {}
+    //   // check if node as description
+    //   if(props && Object.keys(props).length > 0){
+    //     for (const prop in props){
+    //       if(props[prop].$ref){
+    //         const res = await resolveRef(props[prop].$ref, schema);
+    //         if(prop === label){
+    //           const newProp = `${prop}child`
+    //           refStorage[newProp] = res
+    //         }else{
+    //           refStorage[prop] = res;
+    //         }
+    //         nodeProps[prop] = res;
+    //       }
+    //       else{
+    //         //:TODO: Add support for resolved object for children
+    //         const propName = `${prop}${label}`;
+    //         refStorage[propName] = props[prop]
+    //         nodeProps[prop] = props[prop];
+    //       }
+    //     }
+    //     data.properties = nodeProps;
+    //     nodeMaps[node.id] = node;
+    //     setNodeMaps(nodeMaps)
+    //   }
     }
     setCurrentNode(node)
   }
@@ -327,8 +348,8 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, setNodeMaps, nodeMaps, initialNode, schema }: NodeProps) => (
+export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes nodeMaps={nodeMaps} setCurrentNode={setCurrentNode} setNodeMaps={setNodeMaps}  initialNode={initialNode} schema={schema} />
+    <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode}  initialNode={initialNode} schema={schema} />
   </ReactFlowProvider>
 )

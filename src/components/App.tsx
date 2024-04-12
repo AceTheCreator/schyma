@@ -16,7 +16,7 @@ interface Default {
 function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
-  const [nodeMaps, setNodeMaps] = useState<any>({});
+  const [nNodes, setnNodes ] = useState<any>({});
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
 
@@ -39,13 +39,13 @@ function Serval({ title, description, schema }: Default) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes nodeMaps={nodeMaps} setCurrentNode={setCurrentNode} setNodeMaps={setNodeMaps} initialNode={initialNode} schema={schema} />
+        <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} />
         </div>
         <Panel
           title={title}
           description={description}
           node={currentNode}
-          nodes={nodeMaps}
+          nodes={nNodes}
         />
       </div> : <div>loading</div>}
     </div>

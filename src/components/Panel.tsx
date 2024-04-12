@@ -11,29 +11,29 @@ type Props = {
 
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<boolean>()
-  const [children, setChildren] = useState(null);
+  const [children, setChildren] = useState([]);
   const [activeNode, setActiveNode] = useState<Node| undefined>(node)
   const data = node?.data;
   useEffect(() => {
     if(node){
       setView(true);
-      if(data.properties){
-        setChildren(data.properties);
+      if(data.children.length > 0){
+        setChildren(data.children)
         setActiveNode(node);
       }else{
+        console.log(true)
         setActiveNode(nodes[data.parent])
-        setChildren(nodes[data.parent].data.properties);
+        setChildren(nodes[data.parent].data.children);
       }
     }
   },[node])
-
   if (view) {
     return (
       <div className='panel'>
         <h1>{activeNode?.data.title || activeNode?.data.label}</h1>
         <p>{activeNode?.data.description}</p>
 
-        {children && <Tables nodes={children} active={node} />}
+        {children.length > 0 && <Tables nodes={children} active={node} />}
 
         {/* {nodeData?.schema?.examples && (
           <div className='examples-wrapper'>
