@@ -155,19 +155,22 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
   }, []);
 
   const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
-    console.log(node)
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
-      const itemChildren = [
-        ...node.data.children.map((item: MyObject) => {
-          // console.log(item)
-          const eChildren = extractChildren(item.properties || item.addtionalProperties, item);
-          return {
+      const itemChildren:any = [];
+      await Promise.all(
+        node.data.children.map(async (item: MyObject) => {
+          let children = [];
+          if(item.properties){
+            const eChildren = await extractChildren(item.properties, item);
+            children = eChildren
+          }
+          itemChildren.push({
             id: item.id,
-            type: item?.children?.length ? "default" : "output",
+            type: children?.length > 0 ? "default" : "output",
             data: {
               label: item.label,
-              children: eChildren,
+              children: children,
               // children: item.children.length > 0 ? item.children : eChildren,
               parent: item.parent,
               description: item.description,
@@ -176,9 +179,10 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
             sourcePosition: "right",
             targetPosition: "left",
             draggable: false,
-          };
-        }),
-      ];
+          })
+          // console.log(item.parent)
+        })
+      )
       const newEdges = [
         ...edges,
         ...itemChildren.map((item) => {
@@ -251,15 +255,18 @@ const Nodes = ({ setCurrentNode, nodeMaps, setNodeMaps, initialNode, schema }: N
       }
     }
     }
+    console.log(properties)
     return properties
   }
 
   async function handleMouseEnter(_e: any, node: Node) {
+    console.log(node)
     const data = node.data;
     const label = data.label;
     if(!nodeMaps[node.id]){
-      let props = data.properties
+      let props = data.properties;
       const getProperties = extractOtherPropTypes(data, label);
+      console.log(getProperties)
       if(getProperties){
         props = {...props, ...getProperties}
      }
