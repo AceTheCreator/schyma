@@ -14,9 +14,7 @@ import ReactFlow, {
   Connection,
 } from 'reactflow'
 import dagre from 'dagre'
-import {arrayToProps, propMerge, removeChildren, removeElementsByParent, resolveRef, typeCheck } from '../utils/reusables'
-
-const position = { x: 0, y: 0 };
+import {arrayToProps, propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
 
 const initialEdges: [Edge] = [
   {
@@ -40,8 +38,6 @@ dagreGraph.setDefaultEdgeLabel(() => ({}))
 
 const nodeWidth = 172
 const nodeHeight = 36
-
-let storedNodePositions:any = {}; // External storage for node positions
 
 const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => {
   const isHorizontal = direction === 'LR'
@@ -157,25 +153,7 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
   const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
-      // const itemChildren:any = [];
-      // node.data.children.map((item:Node) => {
-      //   const children = item?.children;
-      //   itemChildren.push({
-      //     id: item.id,
-      //     type: children?.length > 0 ? "default" : "output",
-      //     data: {
-      //       label: item.label,
-      //       children: children,
-      //       // children: item.children.length > 0 ? item.children : eChildren,
-      //       parent: item.parent,
-      //       description: item.description,
-      //       relations: item.relations,
-      //     },
-      //     sourcePosition: "right",
-      //     targetPosition: "left",
-      //     draggable: false,
-      //   })
-      // })
+      const itemChildren = node.data.children;
       const newEdges = [
         ...edges,
         ...node.data.children.map((item:Node) => {
@@ -194,13 +172,12 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
         getLayoutedElements(newNodes, newEdges, "LR");
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
-      // if (itemChildren.length) {
-      //   focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9);
-      // }
+      if (itemChildren.length) {
+        focusNode(itemChildren[0].position.x, itemChildren[0].position.y, 0.9);
+      }
     } else {
       const newNodes = removeElementsByParent(nodes, node.id);
       setNodes([...newNodes]);
-      // setEdges([...edges.filter((item) => data.id !== item.source)]);
     }
     }
 
@@ -248,13 +225,10 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
       }
     }
     }
-    console.log(properties)
     return properties
   }
 
   async function handleMouseEnter(_e: any, node: Node) {
-    const data = node.data;
-    const label = data.label;
     if(!nNodes[node.id]){
       const itemChildren:any = [];
       await Promise.all(
@@ -272,6 +246,7 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
               label: item.label,
               children: children,
               parent: item.parent,
+              examples: item.examples,
               description: item.description,
               relations: item.relations,
             },
@@ -279,43 +254,11 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
             targetPosition: "left",
             draggable: false,
           })
-          // console.log(item.parent)
         })
       )
       node.data.children = itemChildren;
       nNodes[node.id] = node;
         setnNodes(nNodes)
-    //   let props = data.properties;
-    //   const getProperties = extractOtherPropTypes(data, label);
-    //   console.log(getProperties)
-    //   if(getProperties){
-    //     props = {...props, ...getProperties}
-    //  }
-    //   const nodeProps:any = {}
-    //   // check if node as description
-    //   if(props && Object.keys(props).length > 0){
-    //     for (const prop in props){
-    //       if(props[prop].$ref){
-    //         const res = await resolveRef(props[prop].$ref, schema);
-    //         if(prop === label){
-    //           const newProp = `${prop}child`
-    //           refStorage[newProp] = res
-    //         }else{
-    //           refStorage[prop] = res;
-    //         }
-    //         nodeProps[prop] = res;
-    //       }
-    //       else{
-    //         //:TODO: Add support for resolved object for children
-    //         const propName = `${prop}${label}`;
-    //         refStorage[propName] = props[prop]
-    //         nodeProps[prop] = props[prop];
-    //       }
-    //     }
-    //     data.properties = nodeProps;
-    //     nodeMaps[node.id] = node;
-    //     setNodeMaps(nodeMaps)
-    //   }
     }
     setCurrentNode(node)
   }

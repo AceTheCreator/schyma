@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Node } from 'reactflow'
 import Tables from './Tables'
+import CodeComponent from './Code'
 
 type Props = {
   node: Node | undefined
@@ -21,7 +22,6 @@ function Panel({ node, nodes, title, description }: Props) {
         setChildren(data.children)
         setActiveNode(node);
       }else{
-        console.log(true)
         setActiveNode(nodes[data.parent])
         setChildren(nodes[data.parent].data.children);
       }
@@ -35,14 +35,14 @@ function Panel({ node, nodes, title, description }: Props) {
 
         {children.length > 0 && <Tables nodes={children} active={node} />}
 
-        {/* {nodeData?.schema?.examples && (
+        {activeNode?.data?.examples && (
           <div className='examples-wrapper'>
-            <h1>Examples</h1>
-            {nodeData?.schema?.examples.map((example: any) => (
+            <h1 className='font-bold'>Examples</h1>
+            {activeNode?.data.examples.map((example: any) => (
               <CodeComponent key={example.title}>{JSON.stringify(example, null, 2)}</CodeComponent>
             ))}
           </div>
-        )} */}
+        )}
       </div>
     )
   }

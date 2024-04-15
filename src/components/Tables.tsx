@@ -9,7 +9,6 @@ interface Children {
 }
 
 function Tables({ nodes, active }: Children) {
-    console.log(nodes)
     return (
         <div className="panel_table-wrapper">
             <table>
