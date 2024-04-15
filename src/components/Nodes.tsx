@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import ReactFlow, {
   useNodesState,
@@ -12,10 +12,13 @@ import ReactFlow, {
   Edge,
   Node,
   Connection,
+  Position,
 } from 'reactflow'
 import dagre from 'dagre'
-import {arrayToProps, propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
+import {propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
+import { JSONSchema7Object } from 'json-schema'
 
+const position =  { x: 0, y: 50 };
 const initialEdges: [Edge] = [
   {
     id: 'edges-e5-7',
@@ -40,7 +43,6 @@ const nodeWidth = 172
 const nodeHeight = 36
 
 const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => {
-  const isHorizontal = direction === 'LR'
   dagreGraph.setGraph({ rankdir: direction })
 
   nodes.forEach(node => {
@@ -48,17 +50,17 @@ const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => 
   });
 
 
-  edges.forEach((edge: any) => {
+  edges.forEach((edge: Edge) => {
     dagreGraph.setEdge(edge.source, edge.target)
   })
 
   dagre.layout(dagreGraph)
 
-  nodes.forEach((node: any) => {
+  nodes.forEach((node: Node) => {
     const nodeId = node.id;
     const nodeWithPosition = dagreGraph.node(nodeId);
-    node.targetPosition = isHorizontal ? 'left' : 'top'
-    node.sourcePosition = isHorizontal ? 'right' : 'bottom'
+    node.sourcePosition = Position.Right;
+    node.targetPosition = Position.Left;
     node.position = {
       x: nodeWithPosition.x - nodeWidth / 3,
       y: nodeWithPosition.y - nodeHeight / 3,
@@ -76,19 +78,14 @@ type NodeProps = {
   setnNodes: any
   nNodes: { [x: string]: Node}
   initialNode: Node
-  schema: any
+  schema: JSONSchema7Object
 }
-
-
-const refStorage: any = {};
-
 
 const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeProps) => {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges);
-  const [nodeState, setNodeState] = useState<any>({});
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
 
   const onConnect = useCallback(
     (connection: Connection) =>
@@ -113,44 +110,44 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
 
   let initialNodes: MyObject = [initialNode];
 
-  const extractChildren = async (props, parent) => {
+  const extractChildren = async (props:MyObject, parent:Node) => {
     const children = [];
     for(const prop in props){
       const id = String(Math.floor(Math.random() * 1000000));
       if(props[prop].$ref){
         const res = await resolveRef(props[prop].$ref, schema);
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]})
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.data.relations, [parent.id]: 'node'}, ...res, children:[]})
       }else{
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]})
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.data.relations, [parent.id]: 'node'}, children:[]})
       }
     }
     return children;
   }
 
   useEffect(() => {
-    const newNodes:any = [];
-    initialNodes.map(async (item) => {
-      const children = await extractChildren(item.properties, item);
+    const newNodes:Node[] = [];
+    initialNodes.map(async (item:Node) => {
+      const children = await extractChildren(item.data.properties, item);
       newNodes.push({
         id: item.id,
-        type: "default",
+        type: "input",
         data: {
           children,
-          label: item.label,
-          description: item.description,
-          properties: {...item.properties},
-          relations: item.relations
+          label: item.data.label,
+          description: item.data.description,
+          properties: {...item.data.properties},
+          relations: item.data.relations
         },
         position: { x: 0, y: 0 },
-        sourcePosition: "right",
-        targetPosition: "left",
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
       })
     })
     setNodes(newNodes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const nodeClick = async (_event: React.MouseEvent, node: MyObject) => {
+  const nodeClick = async (_event: React.MouseEvent, node: Node) => {
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
       const itemChildren = node.data.children;
@@ -167,6 +164,7 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
           };
         }),
       ];
+      //TODO: Fix nodes type error
       const newNodes = nodes.concat(node.data.children);
       const { nodes: layoutedNodes, edges: layoutedEdges } =
         getLayoutedElements(newNodes, newEdges, "LR");
@@ -181,58 +179,11 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
     }
     }
 
-  function extractArrProps(props:any, label: any){
-    const arrProps = arrayToProps(props);
-    if(refStorage[label]){
-    }else{
-      refStorage[label] = {
-        properties: arrProps
-      };
-    }
-    return arrProps
-  }
-
-  function extractOtherPropTypes(data:any, label:string){
-    let properties
-    if(data.parentLabel === label){
-      properties = refStorage[`${label}child`].properties
-    }else{
-      if(data.oneOf){
-        const propRes = extractArrProps(data.oneOf, label)
-        properties = propRes
-      }
-      if(data.items){
-        const {items} = data;
-        if(items.oneOf){
-          const propRes = extractArrProps(items.oneOf, label)
-          properties = propRes
-        }
-      }
-      const newLabel = `${label}${data.parentLabel}`
-      if(refStorage[newLabel]){
-        const mergedProp = propMerge(refStorage[newLabel])
-        properties = mergedProp
-        if(JSON.stringify(refStorage[newLabel].properties) !== JSON.stringify(mergedProp) ){
-          refStorage[newLabel].properties = mergedProp
-        }
-    }else{
-      if(label && refStorage[label]){
-        const mergedProp = propMerge(refStorage[label])
-        properties = mergedProp
-        if(JSON.stringify(refStorage[label].properties) !== JSON.stringify(mergedProp)){
-          refStorage[label].properties = mergedProp
-        }
-      }
-    }
-    }
-    return properties
-  }
-
   async function handleMouseEnter(_e: any, node: Node) {
     if(!nNodes[node.id]){
-      const itemChildren:any = [];
+      const itemChildren: Node[] = [];
       await Promise.all(
-        node.data.children.map(async (item: MyObject) => {
+        node.data.children.map(async (item:any) => {
           let children = [];
           const extractProps = propMerge(item);
           if(Object.keys(extractProps).length > 0){
@@ -250,15 +201,16 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
               description: item.description,
               relations: item.relations,
             },
-            sourcePosition: "right",
-            targetPosition: "left",
+            position: position,
+            sourcePosition: Position.Right,
+            targetPosition: Position.Left,
             draggable: false,
           })
         })
       )
       node.data.children = itemChildren;
       nNodes[node.id] = node;
-        setnNodes(nNodes)
+      setnNodes(nNodes)
     }
     setCurrentNode(node)
   }

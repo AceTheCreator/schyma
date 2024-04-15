@@ -1,10 +1,8 @@
 import React from 'react';
 import { Node } from 'reactflow';
-import { NodeType } from '../types';
-
 
 interface Children {
-    nodes: NodeType[],
+    nodes: Node[],
     active: Node | undefined
 }
 

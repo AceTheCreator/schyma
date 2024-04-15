@@ -5,14 +5,14 @@ import CodeComponent from './Code'
 
 type Props = {
   node: Node | undefined
-  nodes: any
+  nodes: {[x: string]: Node}
   title: string
   description: string
 }
 
 function Panel({ node, nodes, title, description }: Props) {
   const [view, setView] = useState<boolean>()
-  const [children, setChildren] = useState([]);
+  const [children, setChildren] = useState<Node[]>([]);
   const [activeNode, setActiveNode] = useState<Node| undefined>(node)
   const data = node?.data;
   useEffect(() => {

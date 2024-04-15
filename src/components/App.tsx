@@ -16,17 +16,18 @@ interface Default {
 function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
-  const [nNodes, setnNodes ] = useState<any>({});
+  const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
 
-  const initialNode = {
+  const initialNode: Node = {
     id: '1',
-    type: 'input',
-    label: title, 
-    description, 
-    properties: schema.properties, 
-    relations: {},
+    data: {
+      label: title, 
+      description, 
+      properties: schema.properties, 
+      relations: {},
+    },
     position,
   }
   const validate = ajv.validateSchema(schema);
