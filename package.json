@@ -34,6 +34,8 @@
   "author": "_acedcreator",
   "license": "Apache Liscence 2.0",
   "devDependencies": {
+    "@babel/preset-env": "^7.23.3",
+    "@craco/craco": "^7.1.0",
     "@testing-library/react": "^13.3.0",
     "@tisoap/react-flow-smart-edge": "^3.0.0",
     "@types/dagre": "^0.7.48",
@@ -61,8 +63,11 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^10.1.0",
+    "@json-schema-tools/reference-resolver": "^1.2.5",
+    "@stoplight/json-ref-resolver": "^3.1.6",
     "@types/json-schema": "^7.0.12",
     "ajv": "^8.12.0",
+    "child_process": "^1.0.2",
     "json-cycle": "^1.5.0",
     "json-schema-traverse": "^1.0.0",
     "node-fetch": "^3.3.1",

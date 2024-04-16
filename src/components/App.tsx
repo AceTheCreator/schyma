@@ -5,9 +5,6 @@ import { useState } from "react";
 import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
-import { startBuild } from "../scripts";
-import traverse from 'json-schema-traverse'
-import { resolveRef, deepCopy } from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -19,43 +16,39 @@ interface Default {
 function Serval({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
-  const [nodes, passNodes] = useState<Node[]>();
-  const [tree, setTree] = useState(null);
-  
-  const visitedSchemas = new Set();
+  const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
+  const [render, setRender] = useState(false);
+  const position = { x: 0, y: 0 };
+
+  const initialNode: Node = {
+    id: '1',
+    data: {
+      label: title, 
+      description, 
+      properties: schema.properties, 
+      relations: {},
+    },
+    position,
+  }
+  const validate = ajv.validateSchema(schema);
   useEffect(() => {
-    // validate schema
-    async function build(schema: JSONSchema7Object) {
-    const validate = ajv.validateSchema(schema);
-      if (validate) {
-        function callbackFn(schema: any, _JSONPointer: any, rootSchema: any, _parentJSONPointer: any, _parentKeyword: any, _parentSchema: any, _keyIndex: any) {
-          visitedSchemas.add(schema)
-          if (schema.$ref) {
-            const resolvedSchema = resolveRef(schema.$ref, rootSchema);
-            const copied = deepCopy(resolvedSchema)
-            Object.assign(schema, copied);
-          }
-        }
-        traverse(schema, { cb: callbackFn });
-      const res: any = await startBuild(schema)
-      setTree(res)
+    if(validate){
+      setRender(true)
     }
-    }
-    build(schema)
-  }, [])
+  },[validate])
   return (
     <div>
-      {tree ? <div className="body-wrapper">
+      {render ? <div className="body-wrapper">
         <div className="node-container">
-            {tree && <Nodes setCurrentNode={setCurrentNode} passNodes={passNodes} tree={tree} title={title} />}
+        <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} />
         </div>
         <Panel
           title={title}
           description={description}
           node={currentNode}
-          nodes={nodes}
+          nodes={nNodes}
         />
-      </div> : <div />}
+      </div> : <div>loading</div>}
     </div>
   );
 }

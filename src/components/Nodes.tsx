@@ -12,11 +12,14 @@ import ReactFlow, {
   Edge,
   Node,
   Connection,
+  Position,
 } from 'reactflow'
 import dagre from 'dagre'
-import { removeChildren } from '../utils/reusables'
+import {propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
+import { JSONSchema7Object } from 'json-schema'
 
-const initialEdges = [
+const position =  { x: 0, y: 50 };
+const initialEdges: [Edge] = [
   {
     id: 'edges-e5-7',
     source: '0',
@@ -29,32 +32,35 @@ const initialEdges = [
       type: MarkerType.ArrowClosed,
     },
   },
-]
+];
+
 
 const dagreGraph = new dagre.graphlib.Graph()
+
 dagreGraph.setDefaultEdgeLabel(() => ({}))
 
 const nodeWidth = 172
 const nodeHeight = 36
 
-const getLayoutedElements = (nodes: any, edges: any, direction = 'TB') => {
-  const isHorizontal = direction === 'LR'
+const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => {
   dagreGraph.setGraph({ rankdir: direction })
 
-  nodes.forEach((node: any) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
-  })
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
 
-  edges.forEach((edge: any) => {
+
+  edges.forEach((edge: Edge) => {
     dagreGraph.setEdge(edge.source, edge.target)
   })
 
   dagre.layout(dagreGraph)
 
-  nodes.forEach((node: any) => {
-    const nodeWithPosition = dagreGraph.node(node.id)
-    node.targetPosition = isHorizontal ? 'left' : 'top'
-    node.sourcePosition = isHorizontal ? 'right' : 'bottom'
+  nodes.forEach((node: Node) => {
+    const nodeId = node.id;
+    const nodeWithPosition = dagreGraph.node(nodeId);
+    node.sourcePosition = Position.Right;
+    node.targetPosition = Position.Left;
     node.position = {
       x: nodeWithPosition.x - nodeWidth / 3,
       y: nodeWithPosition.y - nodeHeight / 3,
@@ -69,19 +75,17 @@ type MyObject = { [x: string]: any }
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
-  passNodes: (node: any) => void
-  tree: any,
-  title: string
+  setnNodes: any
+  nNodes: { [x: string]: Node}
+  initialNode: Node
+  schema: JSONSchema7Object
 }
 
-const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(tree, initialEdges)
-  let initialNodes: MyObject = tree
-  initialNodes[0].title = title
-
+const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeProps) => {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const { setCenter } = useReactFlow()
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(layoutedNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(layoutedEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
 
   const onConnect = useCallback(
     (connection: Connection) =>
@@ -103,91 +107,112 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
     setCenter(x, y, { zoom, duration: 1000 })
   }
 
-  useEffect(() => {
-    setNodes([
-      ...initialNodes.map((item: MyObject) => {
-        return {
-          id: item.id,
-          type: item?.children?.length ? 'default' : 'output',
-          data: {
-            label: item.title,
-            required: item.required,
-            children: item.children,
-            description: item.description,
-            title: item.title,
-            examples: item.examples,
-          },
-          style: {
-            background: '#1E293B',
-            border: '1px dashed #334155',
-            color: 'white',
-            minWidth: '153px',
-          },
-          position: { x: 0, y: 0 },
-          sourcePosition: 'right',
-          targetPosition: 'left',
-        }
-      }),
-    ])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tree])
 
-  const handleNodeClick = (_event: React.MouseEvent, data: MyObject) => {
-    const findChildren = nodes.filter((item: any) => item?.data?.parent === data.id)
+  let initialNodes: MyObject = [initialNode];
+
+  const extractChildren = async (props:MyObject, parent:MyObject) => {
+    const children = [];
+    for(const prop in props){
+      const id = String(Math.floor(Math.random() * 1000000));
+      if(props[prop].$ref){
+        const res = await resolveRef(props[prop].$ref, schema);
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]})
+      }else{
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]})
+      }
+    }
+    return children;
+  }
+
+  useEffect(() => {
+    const newNodes:Node[] = [];
+    initialNodes.map(async (item:Node) => {
+      const children = await extractChildren(item.data.properties, item);
+      newNodes.push({
+        id: item.id,
+        type: "input",
+        data: {
+          children,
+          label: item.data.label,
+          description: item.data.description,
+          properties: {...item.data.properties},
+          relations: item.data.relations
+        },
+        position: { x: 0, y: 0 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      })
+    })
+    setNodes(newNodes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const nodeClick = async (_event: React.MouseEvent, node: Node) => {
+    const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
-      const required = data.data.required
-      const itemChildren = [
-        ...data.data.children.map((item: MyObject) => {
-          return {
-            id: item.id,
-            type: item?.children?.length ? 'default' : 'output',
-            data: {
-              label: item.name,
-              required: item.required,
-              children: item.children,
-              parent: item.parent,
-              description: item.description,
-              title: item.title,
-              examples: item.examples,
-            },
-            style: { padding: 10, background: '#1E293B', color: 'white' },
-            sourcePosition: 'right',
-            targetPosition: 'left',
-            draggable: false,
-          }
-        }),
-      ]
+      const itemChildren = node.data.children;
       const newEdges = [
         ...edges,
-        ...itemChildren.map((item) => {
+        ...node.data.children.map((item:Node) => {
           return {
             id: String(Math.floor(Math.random() * 1000000)),
             source: item?.data?.parent,
             target: item?.id,
-            animated: true,
-            style: { stroke: required && required.includes(item.data.label) ? '#EB38AB' : 'gray' },
             markerEnd: {
               type: MarkerType.ArrowClosed,
             },
-          }
+          };
         }),
-      ]
-      const newNodes = nodes.concat(itemChildren)
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
-      setNodes([...layoutedNodes])
-      setEdges([...layoutedEdges])
-      if (itemChildren.length > 3) {
-        focusNode(itemChildren[3].position.x, itemChildren[3].position.y, 0.9)
+      ];
+      //TODO: Fix nodes type error
+      const newNodes = nodes.concat(node.data.children);
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(newNodes, newEdges, "LR");
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+      if (itemChildren.length) {
+        focusNode(itemChildren[0].position.x, itemChildren[0].position.y, 0.9);
       }
     } else {
-      const newNodes = removeChildren(data.data, nodes)
-      setNodes([...newNodes])
-      setEdges([...edges.filter((item) => data.id !== item.source)])
+      const newNodes = removeElementsByParent(nodes, node.id);
+      setNodes([...newNodes]);
     }
-  }
-  function handleMouseEnter(_e: any, data: Node) {
-    setCurrentNode(data)
-    passNodes(nodes)
+    }
+
+  async function handleMouseEnter(_e: any, node: Node) {
+    if(!nNodes[node.id]){
+      const itemChildren: Node[] = [];
+      await Promise.all(
+        node.data.children.map(async (item:any) => {
+          let children = [];
+          const extractProps = propMerge(item);
+          if(Object.keys(extractProps).length > 0){
+            const res = await extractChildren(extractProps, item);
+            children = res;
+          }
+          itemChildren.push({
+            id: item.id,
+            type: children?.length > 0 ? "default" : "output",
+            data: {
+              label: item.label,
+              children: children,
+              parent: item.parent,
+              examples: item.examples,
+              description: item.description,
+              relations: item.relations,
+            },
+            position: position,
+            sourcePosition: Position.Right,
+            targetPosition: Position.Left,
+            draggable: false,
+          })
+        })
+      )
+      node.data.children = itemChildren;
+      nNodes[node.id] = node;
+      setnNodes(nNodes)
+    }
+    setCurrentNode(node)
   }
   const edgeTypes = {
     smart: SmartBezierEdge,
@@ -208,7 +233,7 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
         connectionLineType={ConnectionLineType.SmoothStep}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={handleNodeClick}
+        onNodeClick={nodeClick}
         onNodeMouseEnter={handleMouseEnter}
         fitView
         defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
@@ -218,8 +243,8 @@ const Nodes = ({ setCurrentNode, passNodes, tree, title }: NodeProps) => {
 }
 
 // eslint-disable-next-line react/display-name
-export default ({ setCurrentNode, passNodes, tree, title }: NodeProps) => (
+export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: NodeProps) => (
   <ReactFlowProvider>
-    <Nodes setCurrentNode={setCurrentNode} title={title} passNodes={passNodes} tree={tree} />
+    <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode}  initialNode={initialNode} schema={schema} />
   </ReactFlowProvider>
 )

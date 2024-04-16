@@ -1,10 +1,8 @@
 import React from 'react';
 import { Node } from 'reactflow';
-import { NodeType } from '../types/nodes';
-
 
 interface Children {
-    nodes: NodeType[],
+    nodes: Node[],
     active: Node | undefined
 }
 
@@ -23,13 +21,13 @@ function Tables({ nodes, active }: Children) {
                     </tr>
                 </thead>
                 <tbody>
-                    {nodes.map((node: NodeType) => {
-                        return <tr key={node.name} className={`panel_table-wrapper_tbody ${active?.id === node.id ? "panel_table-wrapper_tbody_active" : ""}`}>
+                    {nodes.map((node: Node) => {
+                        return <tr key={node.data.id} className={`panel_table-wrapper_tbody ${active?.data.label === node.data.label ? "panel_table-wrapper_tbody_active" : ""}`}>
                             <th scope="">
-                                {node.name}
+                                {node.data.label}
                             </th>
                             <td>
-                                {node.description}
+                                {node.data.description}
                             </td>
                         </tr>
                     })}
