@@ -110,15 +110,15 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
 
   let initialNodes: MyObject = [initialNode];
 
-  const extractChildren = async (props:MyObject, parent:Node) => {
+  const extractChildren = async (props:MyObject, parent:MyObject) => {
     const children = [];
     for(const prop in props){
       const id = String(Math.floor(Math.random() * 1000000));
       if(props[prop].$ref){
         const res = await resolveRef(props[prop].$ref, schema);
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.data.relations, [parent.id]: 'node'}, ...res, children:[]})
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]})
       }else{
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.data.relations, [parent.id]: 'node'}, children:[]})
+        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]})
       }
     }
     return children;

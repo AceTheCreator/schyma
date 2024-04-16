@@ -11,7 +11,7 @@ export function nameFromRef(string: string){
   return  newRef.split('.')[0]
 }
 
-export function propMerge(schema: { [x: string]: any } ){
+export function propMerge(schema: any){
   let mergedProps = {};
   const {properties, patternProperties, additionalProperties, items, oneOf} = schema;
   const arrWithObject = additionalProperties || items
@@ -64,6 +64,34 @@ export function removeElementsByParent(nodes: any, id: any) {
   return result;
 }
 
+
+export function retrieveObj(theObject: any, key: string | undefined) {
+  var result:any = null;
+  if (theObject instanceof Array) {
+    for (var i = 0; i < theObject.length; i++) {
+      result = retrieveObj(theObject[i], key);
+      if (result) {
+        break;
+      }
+    }
+  } else {
+    for (var prop in theObject) {
+      if (prop == key) {
+        return theObject[prop];
+      }
+      if (
+        theObject[prop] instanceof Object ||
+        theObject[prop] instanceof Array
+      ) {
+        result = retrieveObj(theObject[prop], key);
+        if (result) {
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
 
 // export function typeCheck(data: any): boolean {
 //   switch (true) {
