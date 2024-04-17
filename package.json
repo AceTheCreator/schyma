@@ -1,6 +1,6 @@
 {
   "name": "@acethecreator/serval-components",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "JSON Schemas Visualizer React component",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -31,7 +31,7 @@
     "JSONSchema",
     "APIs"
   ],
-  "author": "_acedcreator",
+  "author": "acethecreator",
   "license": "Apache Liscence 2.0",
   "devDependencies": {
     "@babel/preset-env": "^7.23.3",
