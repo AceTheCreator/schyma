@@ -1,6 +1,6 @@
-# JSON Schema Visualizer(Serval)
+# JSON Schema Visualizer(Schyma)
 
-The JSON Schema Visualizer is a tool designed to simplify the visualization of JSON Schemas, making it less tedious to learn how different parts of api specs are connected(especially when you’re just starting). The visualizer takes JSON Schema files as input and generates a user-friendly graphical representation of the specification.
+Schyma is a tool designed to simplify the visualization of JSON Schemas, making it less tedious to learn how different parts of api specs are connected(especially when you’re just starting). The visualizer takes JSON Schema files as input and generates a user-friendly graphical representation of the specification.
 
 ## Features
 
@@ -26,17 +26,17 @@ The JSON Schema Visualizer currently supports the following JSON Schema formats:
 
 ## Installation & Usage
 
-The easiest way to use serval-components is to install it from npm and build it into your app with Webpack.
+The easiest way to use schyma is to install it from npm and build it into your app with Webpack.
 
 ```
-npm install serval-components
+npm install schyma
 ```
 
 Then use it in your app:
 
 ```js
 import React from 'react';
-import Serval from 'serval-components';
+import Schyma from 'schyma';
 import 'serval-components/src/style.css'
 import schema from '../config/2.6.0.json';
 
@@ -44,7 +44,7 @@ export default function App() {
 
   return (
     <div className="App">
-        <Serval title="Name of Specification" description="Specification Description" schema={schema} />
+        <Schyma title="Name of Specification" description="Specification Description" schema={schema} />
     </div>
   );
 }
@@ -69,7 +69,7 @@ We welcome contributions from the community! If you find a bug, have a feature r
 
 We would like to thank the contributors and supporters of the JSON Schema Visualizer project for their valuable contributions and feedback.
 
-If you like Serval Components, you should [follow me on Twitter](https://twitter.com/_acebuild)!
+If you like Schyma, you should [follow me on Twitter](https://twitter.com/_acebuild)!
 
 Shout out to the [AsyncAPI Community](https://github.com/asyncapi), [Lukasz Gornicki](https://github.com/derberg) who along with many other contributors have made this possible ❤️
 
@@ -77,4 +77,4 @@ Thank you for your interest in our JSON Schema Visualizer project! For more info
 
 ## License
 
-Apache Liscence 2.0. Copyright (c) Azeez Elegbede 2023.
+Apache Liscence 2.0. Copyright (c) Azeez Elegbede 2024.

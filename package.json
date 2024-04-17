@@ -1,5 +1,5 @@
 {
-  "name": "@acethecreator/serval-components",
+  "name": "schyma",
   "version": "1.0.0",
   "description": "JSON Schemas Visualizer React component",
   "main": "./dist/cjs/index.js",
@@ -7,7 +7,7 @@
   "types": "./dist/esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/acethecreator/serval-components.git"
+    "url": "https://github.com/acethecreator/schyma.git"
   },
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs",

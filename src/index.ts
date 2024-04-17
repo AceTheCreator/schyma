@@ -1,3 +1,3 @@
-import Serval from './components/App'
+import Schyma from "./components/App"
 
-export default Serval
+export default Schyma

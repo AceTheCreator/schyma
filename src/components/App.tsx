@@ -13,7 +13,7 @@ interface Default {
 }
 
 
-function Serval({ title, description, schema }: Default) {
+function Schyma({ title, description, schema }: Default) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
@@ -53,4 +53,4 @@ function Serval({ title, description, schema }: Default) {
   );
 }
 
-export default Serval
+export default Schyma
