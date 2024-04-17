@@ -42,7 +42,7 @@ dagreGraph.setDefaultEdgeLabel(() => ({}))
 const nodeWidth = 172
 const nodeHeight = 36
 
-const getLayoutedElements = (nodes: [Node], edges: [Edge], direction = 'LR') => {
+const getLayoutedElements = (nodes: Node<any, string | undefined>[], edges: Edge<any>[], direction = 'LR') => {
   dagreGraph.setGraph({ rankdir: direction })
 
   nodes.forEach(node => {
