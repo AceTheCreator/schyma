@@ -1,6 +1,6 @@
 {
   "name": "schyma",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JSON Schemas Visualizer React component",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -10,11 +10,11 @@
     "url": "https://github.com/acethecreator/schyma.git"
   },
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
+    "build": "npm run build:esm && npm run build:cjs && npm run copy-files",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "prepare": "npm run build",
-    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs"
+    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs dist/esm"
   },
   "peerDependencies": {
     "react": ">=16"

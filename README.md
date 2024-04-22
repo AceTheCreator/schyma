@@ -37,7 +37,7 @@ Then use it in your app:
 ```js
 import React from 'react';
 import Schyma from 'schyma';
-import 'schyma/src/style.css'
+import 'schyma/esm/style.css'
 import schema from '../config/2.6.0.json';
 
 export default function App() {
