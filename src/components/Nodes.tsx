@@ -103,8 +103,17 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
     [],
   )
 
-  const focusNode = (x: number, y: number, zoom: number) => {
-    setCenter(x, y, { zoom, duration: 1000 })
+  const focusNode = (children:any[], zoom: number) => {
+    const length = children.length
+    let middleChild
+    if (length % 2 === 0) {
+      const middleIndex = length / 2;
+      middleChild = children[middleIndex]
+    } else {
+      const middleIndex = Math.floor(length / 2);
+      middleChild = children[middleIndex]
+    }
+    setCenter(middleChild.position.x, middleChild.position.y, { zoom, duration: 1000 })
   }
 
 
@@ -170,8 +179,8 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
         getLayoutedElements(newNodes, newEdges, "LR");
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
-      if (itemChildren.length) {
-        focusNode(itemChildren[0].position.x, itemChildren[0].position.y, 0.9);
+      if (itemChildren.length > 0) {
+        focusNode(itemChildren, 0.9);
       }
     } else {
       const newNodes = removeElementsByParent(nodes, node.id);
@@ -180,6 +189,7 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
     }
 
   async function handleMouseEnter(_e: any, node: Node) {
+    console.log(node)
     if(!nNodes[node.id]){
       const itemChildren: Node[] = [];
       await Promise.all(
