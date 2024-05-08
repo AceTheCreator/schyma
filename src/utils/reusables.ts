@@ -11,13 +11,12 @@ export function nameFromRef(string: string){
   return  newRef.split('.')[0]
 }
 
-export function propMerge(schema: any){
+export function propMerge(schema: any, label: string){
   let mergedProps = {};
-  const {properties, patternProperties, additionalProperties, items, oneOf} = schema;
+  const {properties, patternProperties, additionalProperties, items, oneOf, allOf, anyOf, not} = schema;
   const arrWithObject = additionalProperties || items
-
   const arrExtractor = (items:any) => {
-    const props = arrayToProps(items)
+    const props = arrayToProps(items, label)
     mergedProps = {...mergedProps, ...props}
   }
   if(schema.patternProperties){
@@ -31,18 +30,45 @@ export function propMerge(schema: any){
       arrExtractor(arrWithObject.oneOf)
     }
   }
-  if(oneOf){
-    arrExtractor(oneOf)
+  // handling allOf case seperatly
+  if(allOf){
+    let propObj:any = {};
+    for(let i = 0; i < allOf.length; i++){
+      if(allOf[i].type === 'object'){
+        if(allOf[i].properties){
+          propObj = allOf[i].properties
+        }else{
+          propObj[allOf[i].type] = allOf[i]
+        }
+      }else if(allOf[i].$ref){
+        const name = nameFromRef(allOf[i].$ref)
+        propObj[name] = allOf[i];
+      }else{
+        propObj[allOf[i].type] = allOf[i]
+      }
+    }
+    mergedProps = propObj
+  }
+  if(oneOf || anyOf || not){
+    const items = oneOf || anyOf || not;
+    arrExtractor(items)
   }
   return mergedProps
 }
 
-export function arrayToProps (props: any) {
+export function arrayToProps (props: any, label: string) {
   const propObj:any = {};
   for(let i = 0; i < props.length; i++){
     if(props[i].$ref){
       const name = nameFromRef(props[i].$ref)
       propObj[name] = props[i];
+    }else{
+      if(props[i].type === 'object'){
+          const objectName = `${label}Object`;
+          propObj[objectName] = props[i]
+      }else{
+        propObj[props[i].type] = props[i]
+      }
     }
   }
   return propObj;

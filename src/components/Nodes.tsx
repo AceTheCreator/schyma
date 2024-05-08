@@ -195,7 +195,7 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
       await Promise.all(
         node.data.children.map(async (item:any) => {
           let children = [];
-          const extractProps = propMerge(item);
+          const extractProps = propMerge(item, item.label);
           if(Object.keys(extractProps).length > 0){
             const res = await extractChildren(extractProps, item);
             children = res;
