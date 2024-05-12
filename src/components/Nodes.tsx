@@ -188,8 +188,8 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
     }
     }
 
+
   async function handleMouseEnter(_e: any, node: Node) {
-    console.log(node)
     if(!nNodes[node.id]){
       const itemChildren: Node[] = [];
       await Promise.all(

@@ -26,8 +26,13 @@ export function propMerge(schema: any, label: string){
     mergedProps = {...mergedProps, ...properties}
   }
   if(arrWithObject){
-    if(arrWithObject.oneOf){
-      arrExtractor(arrWithObject.oneOf)
+    const {oneOf, allOf, anyOf} = arrWithObject
+    if(oneOf || allOf || anyOf){
+      arrExtractor({ oneOf, allOf, anyOf })
+    }
+    if(arrWithObject.$ref) {
+      const name = nameFromRef(arrWithObject.$ref)
+      mergedProps = {...mergedProps, [name]: arrWithObject}
     }
   }
   // handling allOf case seperatly
@@ -64,7 +69,7 @@ export function arrayToProps (props: any, label: string) {
       propObj[name] = props[i];
     }else{
       if(props[i].type === 'object'){
-          const objectName = `${label}Object`;
+          const objectName = props[i].title || `${label}Object`;
           propObj[objectName] = props[i]
       }else{
         propObj[props[i].type] = props[i]
