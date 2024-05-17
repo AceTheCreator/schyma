@@ -28,7 +28,8 @@ export function propMerge(schema: any, label: string){
   if(arrWithObject){
     const {oneOf, allOf, anyOf} = arrWithObject
     if(oneOf || allOf || anyOf){
-      arrExtractor({ oneOf, allOf, anyOf })
+      const items = oneOf || anyOf || not;
+      arrExtractor(items)
     }
     if(arrWithObject.$ref) {
       const name = nameFromRef(arrWithObject.$ref)
@@ -52,7 +53,7 @@ export function propMerge(schema: any, label: string){
         propObj[allOf[i].type] = allOf[i]
       }
     }
-    mergedProps = propObj
+    mergedProps = {...mergedProps, ...propObj}
   }
   if(oneOf || anyOf || not){
     const items = oneOf || anyOf || not;
