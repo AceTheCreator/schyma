@@ -1,6 +1,6 @@
 {
   "name": "schyma",
-  "version": "1.0.2",
+  "version": "1.0.3s",
   "description": "JSON Schemas Visualizer React component",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
