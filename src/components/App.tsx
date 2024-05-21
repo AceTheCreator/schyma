@@ -20,12 +20,17 @@ function Schyma({ title, description, schema }: Default) {
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
 
+  const properties = {
+    ...(schema.patternProperties) as Record<string, unknown>, 
+    ...(schema.properties) as Record<string, unknown>,
+    ...(schema.additionalProperties) as Record<string, unknown> };
+
   const initialNode: Node = {
     id: '1',
     data: {
       label: title, 
       description, 
-      properties: schema.properties, 
+      properties: properties, 
       relations: {},
     },
     position,
