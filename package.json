@@ -14,7 +14,8 @@
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "prepare": "npm run build",
-    "copy-files": "copyfiles -u 1 -E -V  \"src/**/*.*css\" dist/cjs dist/esm"
+    "copy-files": "copyfiles -u 1 -E -V \"src/**/*.*css\" dist/cjs && copyfiles -u 1 -E -V \"src/**/*.*css\" dist/esm"
+
   },
   "peerDependencies": {
     "react": ">=16"

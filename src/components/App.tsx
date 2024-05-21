@@ -5,6 +5,7 @@ import { useState } from "react";
 import Nodes from "./Nodes";
 import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
+import { propMerge } from "../utils/reusables";
 
 interface Default {
   title: string;
@@ -19,12 +20,7 @@ function Schyma({ title, description, schema }: Default) {
   const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
-
-  const properties = {
-    ...(schema.patternProperties) as Record<string, unknown>, 
-    ...(schema.properties) as Record<string, unknown>,
-    ...(schema.additionalProperties) as Record<string, unknown> };
-
+  const properties = propMerge(schema, "");
   const initialNode: Node = {
     id: '1',
     data: {
