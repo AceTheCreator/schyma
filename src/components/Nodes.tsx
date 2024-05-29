@@ -136,7 +136,6 @@ const Nodes = ({ setCurrentNode, setnNodes ,initialNode, nNodes, schema }: NodeP
   useEffect(() => {
     const newNodes:Node[] = [];
     initialNodes.map(async (item:Node) => {
-      console.log(item.data)
       const children = await extractChildren(item.data.properties, item);
       newNodes.push({
         id: item.id,
