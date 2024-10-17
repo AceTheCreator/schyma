@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Node } from 'reactflow';
+import { Node } from '@xyflow/react';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
@@ -41,7 +41,8 @@ function Schyma({ title, description, schema }: Default) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} />
+          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} />
+        {/* <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} /> */}
         </div>
         <Panel
           title={title}
