@@ -124,18 +124,3 @@ export function retrieveObj(theObject: any, key: string | undefined) {
   }
   return result;
 }
-
-// export function typeCheck(data: any): boolean {
-//   switch (true) {
-//     case !!data.oneOf:
-//     case !!data.anyOf:
-//     case !!data.allOf:
-//     case !!data.items:
-//     case !! data.patternProperties:
-//     case data.additionalProperties !== undefined && data.additionalProperties !== true:
-//     case data.additionalItems !== undefined && data.additionalItems !== true:
-//       return true;
-//     default:
-//       return false;
-//   }
-// }

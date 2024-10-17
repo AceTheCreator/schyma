@@ -3,18 +3,12 @@ import { Node } from '@xyflow/react';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
-import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import { propMerge } from "../utils/reusables";
-
-interface Default {
-  title: string;
-  description: string;
-  schema: JSONSchema7Object
-}
+import { ISchyma } from "../types";
 
 
-function Schyma({ title, description, schema }: Default) {
+function Schyma({ title, description, schema }: ISchyma) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
@@ -42,7 +36,6 @@ function Schyma({ title, description, schema }: Default) {
       {render ? <div className="body-wrapper">
         <div className="node-container">
           <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} />
-        {/* <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} /> */}
         </div>
         <Panel
           title={title}

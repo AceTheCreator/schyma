@@ -18,8 +18,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import {propMerge, removeElementsByParent, resolveRef } from '../utils/reusables';
 import { JSONSchema7Object } from 'json-schema'
+import { IObject, NodeData } from '../types';
 
-type MyObject = { [x: string]: any }
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
@@ -53,7 +53,7 @@ dagreGraph.setDefaultEdgeLabel(() => ({}))
 const nodeWidth = 172
 const nodeHeight = 36
 
-const getLayoutedElements = (nodes: Node<any>[], edges: Edge<any>[], direction = 'LR') => {
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
   dagreGraph.setGraph({ rankdir: direction })
 
   nodes.forEach(node => {
@@ -83,22 +83,35 @@ const getLayoutedElements = (nodes: Node<any>[], edges: Edge<any>[], direction =
 
 
 function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProps) {
-  let initialNodes: MyObject = [initialNode] 
   const {nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
   const {setCenter} = useReactFlow()
   const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
-  const extractChildren = async (props:any, parent:MyObject) => {
-    const children = [];
+  const extractChildren = async (props: IObject, parent:IObject) => {
+    const children:Node[] = [];
     for(const prop in props){
       const id = String(Math.floor(Math.random() * 1000000));
       if(props[prop].$ref){
         const res = await resolveRef(props[prop].$ref, schema);
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]})
+        children.push({
+          id,
+          type: 'input',
+          data: {...props[prop], label:prop, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, ...res, children:[]},
+          position: position,
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+        })
       }else{
-        children.push({...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]})
+        children.push({
+          id,
+          type: 'input',
+          data: {...props[prop], label:prop, id, parent:parent.id, relations:{...parent.relations, [parent.id]: 'node'}, children:[]},
+          position: position,
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+        })
       }
     }
     return children;
@@ -107,27 +120,23 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
   useEffect(() => {
     const fetchInitialChildren = async () => {
       const newNodes: Node[] = [];
-      // Wait for all initialNodes' children to be fetched
-      await Promise.all(
-        initialNodes.map(async (item: Node) => {
-          const children = await extractChildren(item.data.properties, item);
-          newNodes.push({
-            id: item.id,
-            type: "input",
-            data: {
-              children,
-              label: item.data.label,
-              description: item.data.description,
-              properties: item.data.properties,
-              relations: item.data.relations
-            },
-            position: position,
-            sourcePosition: Position.Right,
-            targetPosition: Position.Left,
-          });
-        })
-      );
-      setNodes(newNodes);
+      const properties = (initialNode.data as unknown as NodeData).properties;
+      const children = await extractChildren(properties, initialNode);
+      newNodes.push({
+        id: initialNode.id,
+        type: "input",
+        data: {
+          children,
+          label: initialNode.data.label,
+          description: initialNode.data.description,
+          properties: initialNode.data.properties,
+          relations: initialNode.data.relations
+        },
+        position: position,
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      });
+      setNodes(newNodes)
     };
   
     fetchInitialChildren();
@@ -135,7 +144,7 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
   }, []);
 
   // Node focus when clicked
-  const focusNode = (children:any[], zoom: number) => {
+  const focusNode = (children:Node[], zoom: number) => {
     const length = children.length
     let middleChild
     if (length % 2 === 0) {
@@ -152,13 +161,13 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
   const nodeClick = async (_event: React.MouseEvent, node: Node) => {
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id);
     if (!findChildren.length) {
-      const itemChildren: any = node.data.children;
-      const newEdges = [
+      const itemChildren = (node.data as unknown as NodeData).children;
+      const newEdges: Edge[] = [
         ...edges,
         ...itemChildren.map((item:Node) => {
           return {
             id: String(Math.floor(Math.random() * 1000000)),
-            source: item?.data?.parent,
+            source: item?.data?.parent as string,
             target: item?.id,
             markerEnd: {
               type: MarkerType.ArrowClosed,
@@ -182,14 +191,15 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
     }
 
   //On Node Hover
-  async function handleMouseEnter(_e: any, node: Node) {
+  async function handleMouseEnter(_e: React.MouseEvent, node: Node) {
     if(!nNodes[node.id]){
       const itemChildren: Node[] = [];
-      const nodeChildren: any = node.data.children;
+      const nodeChildren = (node.data as unknown as NodeData).children;
       await Promise.all(
-        nodeChildren.map(async (item:any) => {
-          let children = [];
-          const extractProps = propMerge(item, item.label);
+        nodeChildren.map(async (item:Node) => {
+          let children:Node[] = [];
+          const label = (item.data as unknown as NodeData).label
+          const extractProps = propMerge(item.data, label);
           if(Object.keys(extractProps).length > 0){
             const res = await extractChildren(extractProps, item);
             children = res;
@@ -198,12 +208,12 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
             id: item.id,
             type: children?.length > 0 ? "default" : "output",
             data: {
-              label: item.label,
+              label: item.data.label,
               children: children,
-              parent: item.parent,
-              examples: item.examples,
-              description: item.description,
-              relations: item.relations,
+              parent: item.data.parent,
+              examples: item.data.examples,
+              description: item.data.description,
+              relations: item.data.relations,
             },
             position: position,
             sourcePosition: Position.Right,

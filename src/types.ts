@@ -1,26 +1,27 @@
-export type NodeType = {
-  id: string;
-  name: string;
-  parent: number;
-  description: string;
-  children: Array<Node>;
-  $ref?: string;
+import { JSONSchema7Object } from "json-schema";
+import { Node } from "@xyflow/react";
+
+export interface ISchyma {
   title: string;
-  label: string;
-  targetPosition?: string;
-  sourcePosition?: string;
-  position?: object;
-  data?: NodeType;
-};
+  description: string;
+  schema: JSONSchema7Object
+}
 
-export type EdgeType = {
+export interface IObject {
+  [x: string]: any
+}
+
+export interface NodeData {
+  label: string;
   id: string;
-  source: string;
-  target: string;
-  label: string;
-  labelBgPadding: number[];
-  labelBgBorderRadius: number;
-  labelBgStyle: object;
-  markerEnd: object;
-};
+  children: Node[];  // children is an array of Node elements, or it can be any specific type you want
+  description?: string;
+  properties?: any;
+  relations: any;
+  examples?: any;
+  parent: string;
+}
 
+// export interface INode extends Node {
+//   data: NodeData
+// }
