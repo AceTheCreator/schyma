@@ -96,6 +96,16 @@ export function removeElementsByParent(nodes: any, id: any) {
   return result;
 }
 
+export function removeEdgesByParent(edges: any, id: any) {
+  const result = edges.filter((edge: any) => {
+    if (edge.source === id) {
+      return false;
+    }
+    return true;
+  });
+
+  return result;
+}
 
 export function retrieveObj(theObject: any, key: string | undefined) {
   var result:any = null;

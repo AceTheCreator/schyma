@@ -15,7 +15,6 @@
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "prepare": "npm run build",
     "copy-files": "copyfiles -u 1 -E -V \"src/**/*.*css\" dist/cjs && copyfiles -u 1 -E -V \"src/**/*.*css\" dist/esm"
-
   },
   "peerDependencies": {
     "react": ">=16"
@@ -44,6 +43,7 @@
     "@types/react-syntax-highlighter": "^15.5.7",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -60,7 +60,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "dagre": "^0.8.5",
+    "@dagrejs/dagre": "^1.1.4",
     "reactflow": "^11.7.4",
     "@tisoap/react-flow-smart-edge": "^3.0.0",
     "@json-schema-tools/reference-resolver": "^1.2.5",

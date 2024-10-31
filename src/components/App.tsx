@@ -1,18 +1,19 @@
-import React, { useEffect } from "react";
-import { Node } from 'reactflow';
-import Panel from "./Panel";
-import { useState } from "react";
-import Nodes from "./Nodes";
-import { JSONSchema7Object } from "json-schema";
-import Ajv from "ajv";
-import { propMerge } from "../utils/reusables";
+import React, { useEffect } from 'react'
+import { Edge, Node, Position } from 'reactflow'
+import Panel from './Panel'
+import { useState } from 'react'
+import Nodes from './Nodes'
+import { JSONSchema7Object } from 'json-schema'
+import Ajv from 'ajv'
+import { propMerge } from '../utils/reusables'
+import dagre from 'dagre'
+import { nodeHeight, nodeWidth } from '../constants/node'
 
 interface Default {
-  title: string;
-  description: string;
+  title: string
+  description: string
   schema: JSONSchema7Object
 }
-
 
 function Schyma({ title, description, schema }: Default) {
   const ajv = new Ajv();
@@ -31,27 +32,66 @@ function Schyma({ title, description, schema }: Default) {
     },
     position,
   }
-  const validate = ajv.validateSchema(schema);
+  const validate = ajv.validateSchema(schema)
+
+  const dagreGraph = new dagre.graphlib.Graph()
+
+  dagreGraph.setDefaultEdgeLabel(() => ({}))
+
+  const getLayoutedElements = (nodes: Node<any, string | undefined>[], edges: Edge<any>[], direction = 'LR') => {
+    dagreGraph.setGraph({ rankdir: direction })
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
+    })
+
+    edges.forEach((edge: Edge) => {
+      dagreGraph.setEdge(edge.source, edge.target)
+    })
+
+    dagre.layout(dagreGraph)
+
+    nodes.forEach((node: Node) => {
+      const nodeId = node.id
+      const nodeWithPosition = dagreGraph.node(nodeId)
+      node.sourcePosition = Position.Right
+      node.targetPosition = Position.Left
+      node.position = {
+        x: nodeWithPosition.x - nodeWidth / 3,
+        y: nodeWithPosition.y - nodeHeight / 3,
+      }
+      return node
+    })
+
+    return { nodes, edges }
+  }
+
   useEffect(() => {
     if(validate){
       setRender(true)
     }
-  },[validate])
+  }, [validate])
   return (
     <div>
-      {render ? <div className="body-wrapper">
-        <div className="node-container">
-        <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} />
+      {render ? (
+        <div className='body-wrapper'>
+          <div className='node-container'>
+            <Nodes
+              setnNodes={setnNodes}
+              nNodes={nNodes}
+              setCurrentNode={setCurrentNode}
+              initialNode={initialNode}
+              schema={schema}
+              getLayoutedElements={getLayoutedElements}
+            />
+          </div>
+          <Panel title={title} description={description} node={currentNode} nodes={nNodes} />
         </div>
-        <Panel
-          title={title}
-          description={description}
-          node={currentNode}
-          nodes={nNodes}
-        />
-      </div> : <div>loading</div>}
+      ) : (
+        <div>loading</div>
+      )}
     </div>
-  );
+  )
 }
 
 export default Schyma
