@@ -204,6 +204,7 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
             const res = await extractChildren(extractProps, item);
             children = res;
           }
+          const relations =  {...(node.data.relations as Record<number, string>), ...(item.data.relations as Record<number, string>)};
           itemChildren.push({
             id: item.id,
             type: children?.length > 0 ? "default" : "output",
@@ -213,7 +214,7 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
               parent: item.data.parent,
               examples: item.data.examples,
               description: item.data.description,
-              relations: item.data.relations,
+              relations: relations,
             },
             position: position,
             sourcePosition: Position.Right,
