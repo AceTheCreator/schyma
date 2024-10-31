@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import dagre from 'dagre';
+import dagre from '@dagrejs/dagre';
+import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import {
   ReactFlow,
   MiniMap,
@@ -14,6 +15,8 @@ import {
   addEdge,
   Position,
   ReactFlowProvider,
+  Connection,
+  ConnectionLineType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {propMerge, removeElementsByParent, resolveRef } from '../utils/reusables';
@@ -87,7 +90,21 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
   const {setCenter} = useReactFlow()
-  const onConnect = useCallback((params: any) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+  const onConnect = useCallback(
+    (connection: Connection) =>
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            type: ConnectionLineType.SmoothStep,
+            animated: true,
+          },
+          eds,
+        ),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   const extractChildren = async (props: IObject, parent:IObject) => {
     const children:Node[] = [];
@@ -229,11 +246,17 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
     setCurrentNode(node)
   }
 
+  const edgeTypes = {
+    smart: SmartBezierEdge,
+  }
+
   return (
       <ReactFlow
       nodes={nodes}
       edges={edges}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
+      connectionLineType={ConnectionLineType.SmoothStep}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeMouseEnter={handleMouseEnter}
