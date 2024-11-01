@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect } from 'react';
-import dagre from '@dagrejs/dagre';
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import {
   ReactFlow,
@@ -19,7 +18,7 @@ import {
   ConnectionLineType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import {propMerge, removeElementsByParent, resolveRef } from '../utils/reusables';
+import {propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables';
 import { JSONSchema7Object } from 'json-schema'
 import { IObject, NodeData } from '../types';
 
@@ -30,6 +29,10 @@ type NodeProps = {
   nNodes: { [x: string]: Node}
   initialNode: Node
   schema: JSONSchema7Object
+  getLayoutedElements: (nodes: Node[], edges: Edge[], direction?: string) => {
+    nodes: Node[];
+    edges: Edge[];
+  }
 }
 
 
@@ -49,43 +52,7 @@ const initialEdges: [Edge] = [
   },
 ];
 
-const dagreGraph = new dagre.graphlib.Graph()
-
-dagreGraph.setDefaultEdgeLabel(() => ({}))
-
-const nodeWidth = 172
-const nodeHeight = 36
-
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
-  dagreGraph.setGraph({ rankdir: direction })
-
-  nodes.forEach(node => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-  });
-
-  edges.forEach((edge: Edge) => {
-    dagreGraph.setEdge(edge.source, edge.target)
-  })
-
-  dagre.layout(dagreGraph)
-
-  nodes.forEach((node: Node) => {
-    const nodeId = node.id;
-    const nodeWithPosition = dagreGraph.node(nodeId);
-    node.sourcePosition = Position.Right;
-    node.targetPosition = Position.Left;
-    node.position = {
-      x: nodeWithPosition.x - nodeWidth / 3,
-      y: nodeWithPosition.y - nodeHeight / 3,
-    }
-    return node
-  })
-
-  return { nodes, edges }
-}
-
-
-function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProps) {
+function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema, getLayoutedElements}: NodeProps) {
   const {nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
@@ -204,6 +171,8 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
     } else {
       const newNodes = removeElementsByParent(nodes, node.id);
       setNodes([...newNodes]);
+      const newEdges = removeEdgesByParent(edges, node.id);
+      setEdges([...newEdges]);
     }
     }
 
@@ -271,9 +240,9 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
   );
 }
 
-export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: NodeProps) => (
+export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema, getLayoutedElements }: NodeProps) => (
   <ReactFlowProvider>
-    <Flow setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode}  initialNode={initialNode} schema={schema} />
+    <Flow setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode}  initialNode={initialNode} schema={schema} getLayoutedElements={getLayoutedElements} />
   </ReactFlowProvider>
 )
 
