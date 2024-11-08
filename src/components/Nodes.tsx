@@ -43,6 +43,7 @@ const initialEdges: [Edge] = [
     labelBgPadding: [8, 4],
     labelBgBorderRadius: 4,
     animated: true,
+    type: 'smart',
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
@@ -149,7 +150,7 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
           properties: initialNode.data.properties,
           relations: initialNode.data.relations
         },
-        position: position,
+        position: { x: 0, y: 0 },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       });
@@ -261,8 +262,7 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema}: NodeProp
       onConnect={onConnect}
       onNodeMouseEnter={handleMouseEnter}
       onNodeClick={nodeClick}
-      fitView
-      maxZoom={0.9}
+      defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
     >
       <MiniMap />
       <Controls />
