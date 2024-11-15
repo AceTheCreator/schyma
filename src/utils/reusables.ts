@@ -20,7 +20,7 @@ export function nameFromRef(ref: string): string {
 export function propMerge(schema: any, label: string) {
   let mergedProps: Record<string, unknown> = {}
   const { properties, patternProperties, additionalProperties, items, oneOf, allOf, anyOf, not } = schema
-  const combinedOf = oneOf || allOf || anyOf || not
+  const combinedOf = oneOf || anyOf || not
   if (patternProperties) {
     Object.assign(mergedProps, patternProperties)
   }
@@ -56,10 +56,10 @@ export function propMerge(schema: any, label: string) {
         propObj[allOf[i].type] = allOf[i]
       }
     }
-    mergedProps = { ...mergedProps, ...propObj }
+    Object.assign(mergedProps, propObj);
   }
   if (combinedOf) {
-    const props = arrayToProps(combinedOf, label)
+    const props = arrayToProps(combinedOf, label);
     Object.assign(mergedProps, props)
   }
   return mergedProps
@@ -95,6 +95,5 @@ export function removeElementsByParent(nodes: any, id: any) {
     }
     return node
   })
-
   return result
 }
