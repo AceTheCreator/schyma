@@ -62,11 +62,11 @@
     "@json-schema-tools/reference-resolver": "^1.2.5",
     "@tisoap/react-flow-smart-edge": "^3.0.0",
     "@types/json-schema": "^7.0.12",
-    "@xyflow/react": "^12.3.2",
     "ajv": "^8.12.0",
     "json-schema-traverse": "^1.0.0",
     "node-fetch": "^3.3.1",
     "react-syntax-highlighter": "^15.5.0",
+    "reactflow": "^11.11.4",
     "tslib": "^2.5.3",
     "typescript-plugin-css-modules": "^5.0.1"
   }

@@ -16,8 +16,7 @@ import {
   ReactFlowProvider,
   Connection,
   ConnectionLineType,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+} from 'reactflow'
 import {propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables';
 import { JSONSchema7Object } from 'json-schema'
 import { IObject, NodeData } from '../types'
