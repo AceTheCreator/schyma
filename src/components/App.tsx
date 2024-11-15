@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Node } from '@xyflow/react';
+import { Node } from 'reactflow';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";

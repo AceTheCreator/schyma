@@ -1,5 +1,5 @@
 import { JSONSchema7Object } from "json-schema";
-import { Node } from "@xyflow/react";
+import { Node } from "reactflow";
 
 export interface ISchyma {
   title: string;
