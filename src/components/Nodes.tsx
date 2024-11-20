@@ -178,9 +178,10 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       }
     } else {
       const newNodes = removeElementsByParent(nodes, node.id)
-      setNodes([...newNodes])
       const newEdges = removeEdgesByParent(edges, node.id)
-      setEdges([...newEdges])
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
+      setNodes([...layoutedNodes])
+      setEdges([...layoutedEdges])
     }
   }
 
