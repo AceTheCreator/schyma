@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import {
   ReactFlow,
@@ -17,9 +17,10 @@ import {
   Connection,
   ConnectionLineType,
 } from 'reactflow'
-import {propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables';
+import { propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables'
 import { JSONSchema7Object } from 'json-schema'
 import { IObject, NodeData } from '../types'
+import { getLayoutedElements } from '../utils/dagreUtils'
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
@@ -27,10 +28,6 @@ type NodeProps = {
   nNodes: { [x: string]: Node }
   initialNode: Node
   schema: JSONSchema7Object
-  getLayoutedElements: (nodes: Node[], edges: Edge[], direction?: string) => {
-    nodes: Node[];
-    edges: Edge[];
-  }
 }
 
 const position = { x: 0, y: 0, zoom: 0.2 }
@@ -50,11 +47,11 @@ const initialEdges: [Edge] = [
   },
 ]
 
-function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema, getLayoutedElements}: NodeProps) {
-  const {nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
-  const {setCenter} = useReactFlow()
+function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodeProps) {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
+  const { setCenter } = useReactFlow()
   const onConnect = useCallback(
     (connection: Connection) =>
       setEdges((eds) =>
@@ -180,10 +177,10 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema, getLayout
         focusNode(itemChildren, 0.9)
       }
     } else {
-      const newNodes = removeElementsByParent(nodes, node.id);
-      setNodes([...newNodes]);
-      const newEdges = removeEdgesByParent(edges, node.id);
-      setEdges([...newEdges]);
+      const newNodes = removeElementsByParent(nodes, node.id)
+      setNodes([...newNodes])
+      const newEdges = removeEdgesByParent(edges, node.id)
+      setEdges([...newEdges])
     }
   }
 
@@ -254,8 +251,14 @@ function Flow({initialNode, nNodes, setnNodes, setCurrentNode, schema, getLayout
   )
 }
 
-export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema, getLayoutedElements }: NodeProps) => (
+export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: NodeProps) => (
   <ReactFlowProvider>
-    <Flow setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode}  initialNode={initialNode} schema={schema} getLayoutedElements={getLayoutedElements} />
+    <Flow
+      setnNodes={setnNodes}
+      nNodes={nNodes}
+      setCurrentNode={setCurrentNode}
+      initialNode={initialNode}
+      schema={schema}
+    />
   </ReactFlowProvider>
 )

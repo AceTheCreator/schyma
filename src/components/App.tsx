@@ -1,14 +1,11 @@
 import React, { useEffect } from "react";
-import { Edge, Node, Position } from 'reactflow';
+import { Node} from 'reactflow';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
 import Ajv from "ajv";
 import { propMerge } from "../utils/reusables";
 import { ISchyma } from "../types";
-import { nodeHeight, nodeWidth } from "../constants/node";
-import dagre from '@dagrejs/dagre';
-
 
 function Schyma({ title, description, schema }: ISchyma) {
   const ajv = new Ajv();
@@ -29,38 +26,6 @@ function Schyma({ title, description, schema }: ISchyma) {
   }
   const validate = ajv.validateSchema(schema);
 
-  const dagreGraph = new dagre.graphlib.Graph()
-
-  dagreGraph.setDefaultEdgeLabel(() => ({}))
-
-  const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
-    dagreGraph.setGraph({ rankdir: direction })
-
-    nodes.forEach(node => {
-      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-    });
-
-    edges.forEach((edge: Edge) => {
-      dagreGraph.setEdge(edge.source, edge.target)
-    })
-
-    dagre.layout(dagreGraph)
-
-    nodes.forEach((node: Node) => {
-      const nodeId = node.id;
-      const nodeWithPosition = dagreGraph.node(nodeId);
-      node.sourcePosition = Position.Right;
-      node.targetPosition = Position.Left;
-      node.position = {
-        x: nodeWithPosition.x - nodeWidth / 3,
-        y: nodeWithPosition.y - nodeHeight / 3,
-      }
-      return node
-    })
-
-    return { nodes, edges }
-  }
-
   useEffect(() => {
     if(validate){
       setRender(true)
@@ -70,7 +35,7 @@ function Schyma({ title, description, schema }: ISchyma) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} getLayoutedElements={getLayoutedElements} />
+          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} />
         </div>
         <Panel
           title={title}
