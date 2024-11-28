@@ -138,14 +138,11 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
 
   // Node focus when clicked
   const focusNode = (children: Node[], zoom: number) => {
-    const length = children.length
-    let middleChild
-    if (length % 2 === 0) {
-      const middleIndex = length / 2
-      middleChild = children[middleIndex]
-    } else {
-      const middleIndex = Math.floor(length / 2)
-      middleChild = children[middleIndex]
+    if (children.length === 0) return
+    let middleChild = children[Math.floor(children.length / 2)]
+    const middleChildWithLatestPosition = nodes.filter((a) => a.id == middleChild.id)[0]
+    if (middleChildWithLatestPosition) {
+      middleChild = middleChildWithLatestPosition;
     }
     setCenter(middleChild.position.x, middleChild.position.y, { zoom, duration: 1000 })
   }
@@ -182,6 +179,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
       setNodes([...layoutedNodes])
       setEdges([...layoutedEdges])
+      focusNode([node], 0.9)
     }
   }
 
