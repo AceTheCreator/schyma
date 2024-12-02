@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
-import { Node } from 'reactflow';
+import { Node} from 'reactflow';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
 import Ajv from "ajv";
 import { propMerge } from "../utils/reusables";
 import { ISchyma } from "../types";
-
 
 function Schyma({ title, description, schema }: ISchyma) {
   const ajv = new Ajv();
@@ -26,6 +25,7 @@ function Schyma({ title, description, schema }: ISchyma) {
     position,
   }
   const validate = ajv.validateSchema(schema);
+
   useEffect(() => {
     if(validate){
       setRender(true)

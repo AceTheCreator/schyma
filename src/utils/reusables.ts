@@ -94,6 +94,47 @@ export function removeElementsByParent(nodes: any, id: any) {
       }
     }
     return node
-  })
-  return result
+  });
+
+  return result;
+}
+
+export function removeEdgesByParent(edges: any, id: any) {
+  const result = edges.filter((edge: any) => {
+    if (edge.source === id) {
+      return false;
+    }
+    return true;
+  });
+
+  return result;
+}
+
+
+export function retrieveObj(theObject: any, key: string | undefined) {
+  var result:any = null;
+  if (theObject instanceof Array) {
+    for (var i = 0; i < theObject.length; i++) {
+      result = retrieveObj(theObject[i], key);
+      if (result) {
+        break;
+      }
+    }
+  } else {
+    for (var prop in theObject) {
+      if (prop == key) {
+        return theObject[prop];
+      }
+      if (
+        theObject[prop] instanceof Object ||
+        theObject[prop] instanceof Array
+      ) {
+        result = retrieveObj(theObject[prop], key);
+        if (result) {
+          break;
+        }
+      }
+    }
+  }
+  return result;
 }

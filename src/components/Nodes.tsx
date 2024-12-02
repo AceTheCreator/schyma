@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect } from 'react'
-import dagre from '@dagrejs/dagre'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import {
   ReactFlow,
@@ -18,9 +17,10 @@ import {
   Connection,
   ConnectionLineType,
 } from 'reactflow'
-import { propMerge, removeElementsByParent, resolveRef } from '../utils/reusables'
+import { propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables'
 import { JSONSchema7Object } from 'json-schema'
 import { IObject, NodeData } from '../types'
+import { getLayoutedElements } from '../utils/dagreUtils'
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
@@ -46,41 +46,6 @@ const initialEdges: [Edge] = [
     },
   },
 ]
-
-const dagreGraph = new dagre.graphlib.Graph()
-
-dagreGraph.setDefaultEdgeLabel(() => ({}))
-
-const nodeWidth = 172
-const nodeHeight = 36
-
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
-  dagreGraph.setGraph({ rankdir: direction })
-
-  nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
-  })
-
-  edges.forEach((edge: Edge) => {
-    dagreGraph.setEdge(edge.source, edge.target)
-  })
-
-  dagre.layout(dagreGraph)
-
-  nodes.forEach((node: Node) => {
-    const nodeId = node.id
-    const nodeWithPosition = dagreGraph.node(nodeId)
-    node.sourcePosition = Position.Right
-    node.targetPosition = Position.Left
-    node.position = {
-      x: nodeWithPosition.x - nodeWidth / 3,
-      y: nodeWithPosition.y - nodeHeight / 3,
-    }
-    return node
-  })
-
-  return { nodes, edges }
-}
 
 function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodeProps) {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
@@ -173,14 +138,11 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
 
   // Node focus when clicked
   const focusNode = (children: Node[], zoom: number) => {
-    const length = children.length
-    let middleChild
-    if (length % 2 === 0) {
-      const middleIndex = length / 2
-      middleChild = children[middleIndex]
-    } else {
-      const middleIndex = Math.floor(length / 2)
-      middleChild = children[middleIndex]
+    if (children.length === 0) return
+    let middleChild = children[Math.floor(children.length / 2)]
+    const middleChildWithLatestPosition = nodes.filter((a) => a.id == middleChild.id)[0]
+    if (middleChildWithLatestPosition) {
+      middleChild = middleChildWithLatestPosition;
     }
     setCenter(middleChild.position.x, middleChild.position.y, { zoom, duration: 1000 })
   }
@@ -213,7 +175,11 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       }
     } else {
       const newNodes = removeElementsByParent(nodes, node.id)
-      setNodes([...newNodes])
+      const newEdges = removeEdgesByParent(edges, node.id)
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(newNodes, newEdges, 'LR')
+      setNodes([...layoutedNodes])
+      setEdges([...layoutedEdges])
+      focusNode([node], 0.9)
     }
   }
 
