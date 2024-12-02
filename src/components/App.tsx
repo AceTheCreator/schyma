@@ -1,20 +1,13 @@
 import React, { useEffect } from "react";
-import { Node } from 'reactflow';
+import { Node} from 'reactflow';
 import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
-import { JSONSchema7Object } from "json-schema";
 import Ajv from "ajv";
 import { propMerge } from "../utils/reusables";
+import { ISchyma } from "../types";
 
-interface Default {
-  title: string;
-  description: string;
-  schema: JSONSchema7Object
-}
-
-
-function Schyma({ title, description, schema }: Default) {
+function Schyma({ title, description, schema }: ISchyma) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
@@ -32,6 +25,7 @@ function Schyma({ title, description, schema }: Default) {
     position,
   }
   const validate = ajv.validateSchema(schema);
+
   useEffect(() => {
     if(validate){
       setRender(true)
@@ -41,7 +35,7 @@ function Schyma({ title, description, schema }: Default) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-        <Nodes setnNodes={setnNodes} nNodes={nNodes} setCurrentNode={setCurrentNode} initialNode={initialNode} schema={schema} />
+          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} />
         </div>
         <Panel
           title={title}
