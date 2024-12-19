@@ -16,7 +16,9 @@ export const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'L
     dagreGraph.setEdge(edge.source, edge.target)
   })
 
-  dagre.layout(dagreGraph)
+  dagre.layout(dagreGraph, {
+    disableOptimalOrderHeuristic: true,
+  })
 
   nodes.forEach((node: Node) => {
     const nodeId = node.id
