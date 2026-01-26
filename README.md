@@ -77,4 +77,4 @@ Thank you for your interest in our JSON Schema Visualizer project! For more info
 
 ## License
 
-Apache Liscence 2.0. Copyright (c) Azeez Elegbede 2024.
+Apache Liscence 2.0. Copyright (c) Azeez Elegbede 2026.
