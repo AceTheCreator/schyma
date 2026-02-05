@@ -17,10 +17,24 @@ export function nameFromRef(ref: string): string {
   return name
 }
 
+const handleAllOfCases = (schema: any, mergedProps: any, label: string) => {
+  console.log(schema)
+  console.log(label)
+  const props = arrayToProps(schema, label)
+  Object.assign(mergedProps, props)
+}
+
 export function propMerge(schema: any, label: string) {
   let mergedProps: Record<string, unknown> = {}
-  const { properties, patternProperties, additionalProperties, items, oneOf, allOf, anyOf, not } = schema
-  const combinedOf = oneOf || anyOf || not
+  const { properties, patternProperties, additionalProperties, items, oneOf, allOf, anyOf, not, if: ifSchema } = schema
+  const combinedOf = oneOf || anyOf || not || allOf
+  const conditions = ifSchema
+
+  if (conditions) {
+    console.log(conditions)
+    console.log(schema)
+  }
+
   if (patternProperties) {
     Object.assign(mergedProps, patternProperties)
   }
@@ -46,6 +60,9 @@ export function propMerge(schema: any, label: string) {
       if (allOf[i].type === 'object') {
         if (allOf[i].properties) {
           propObj = { ...propObj, ...allOf[i].properties }
+        } else if (allOf[i].if) {
+          console.log('found here')
+          console.log(allOf[i].if)
         } else {
           propObj[allOf[i].type] = allOf[i]
         }
@@ -56,11 +73,10 @@ export function propMerge(schema: any, label: string) {
         propObj[allOf[i].type] = allOf[i]
       }
     }
-    Object.assign(mergedProps, propObj);
+    Object.assign(mergedProps, propObj)
   }
   if (combinedOf) {
-    const props = arrayToProps(combinedOf, label);
-    Object.assign(mergedProps, props)
+    handleAllOfCases(schema, mergedProps, label)
   }
   return mergedProps
 }
@@ -94,47 +110,43 @@ export function removeElementsByParent(nodes: any, id: any) {
       }
     }
     return node
-  });
+  })
 
-  return result;
+  return result
 }
 
 export function removeEdgesByParent(edges: any, id: any) {
   const result = edges.filter((edge: any) => {
     if (edge.source === id) {
-      return false;
+      return false
     }
-    return true;
-  });
+    return true
+  })
 
-  return result;
+  return result
 }
 
-
 export function retrieveObj(theObject: any, key: string | undefined) {
-  var result:any = null;
+  var result: any = null
   if (theObject instanceof Array) {
     for (var i = 0; i < theObject.length; i++) {
-      result = retrieveObj(theObject[i], key);
+      result = retrieveObj(theObject[i], key)
       if (result) {
-        break;
+        break
       }
     }
   } else {
     for (var prop in theObject) {
       if (prop == key) {
-        return theObject[prop];
+        return theObject[prop]
       }
-      if (
-        theObject[prop] instanceof Object ||
-        theObject[prop] instanceof Array
-      ) {
-        result = retrieveObj(theObject[prop], key);
+      if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
+        result = retrieveObj(theObject[prop], key)
         if (result) {
-          break;
+          break
         }
       }
     }
   }
-  return result;
+  return result
 }

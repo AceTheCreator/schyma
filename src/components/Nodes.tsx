@@ -110,28 +110,28 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     return children
   }
 
-  useEffect(() => {
-    const fetchInitialChildren = async () => {
-      const newNodes: Node[] = []
-      const properties = (initialNode.data as unknown as NodeData).properties
-      const children = await extractChildren(properties, initialNode)
-      newNodes.push({
-        id: initialNode.id,
-        type: 'input',
-        data: {
-          children,
-          label: initialNode.data.label,
-          description: initialNode.data.description,
-          properties: initialNode.data.properties,
-          relations: initialNode.data.relations,
-        },
-        position: { x: 0, y: 0 },
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-      })
-      setNodes(newNodes)
-    }
+  const fetchInitialChildren = async () => {
+    const newNodes: Node[] = []
+    const properties = (initialNode.data as unknown as NodeData).properties
+    const children = await extractChildren(properties, initialNode)
+    newNodes.push({
+      id: initialNode.id,
+      type: 'input',
+      data: {
+        children,
+        label: initialNode.data.label,
+        description: initialNode.data.description,
+        properties: initialNode.data.properties,
+        relations: initialNode.data.relations,
+      },
+      position: { x: 0, y: 0 },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+    })
+    setNodes(newNodes)
+  }
 
+  useEffect(() => {
     fetchInitialChildren()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -142,7 +142,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     let middleChild = children[Math.floor(children.length / 2)]
     const middleChildWithLatestPosition = nodes.filter((a) => a.id == middleChild.id)[0]
     if (middleChildWithLatestPosition) {
-      middleChild = middleChildWithLatestPosition;
+      middleChild = middleChildWithLatestPosition
     }
     setCenter(middleChild.position.x, middleChild.position.y, { zoom, duration: 1000 })
   }
