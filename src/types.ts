@@ -1,6 +1,13 @@
 import { JSONSchema7Object } from "json-schema";
 import { Node } from "reactflow";
 
+export enum CompositionType {
+  OneOf = 'oneOf',
+  AnyOf = 'anyOf',
+  AllOf = 'allOf',
+  Not = 'not',
+}
+
 export interface ISchyma {
   title: string;
   description: string;
@@ -20,6 +27,7 @@ export interface NodeData {
   relations: any;
   examples?: any;
   parent: string;
+  compositionType?: CompositionType | null;
 }
 
 // export interface INode extends Node {

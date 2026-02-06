@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge'
 import {
   ReactFlow,
@@ -17,10 +17,17 @@ import {
   Connection,
   ConnectionLineType,
 } from 'reactflow'
-import { propMerge, removeEdgesByParent, removeElementsByParent, resolveRef } from '../utils/reusables'
+import {
+  getCompositionType,
+  propMerge,
+  removeEdgesByParent,
+  removeElementsByParent,
+  resolveRef,
+} from '../utils/reusables'
 import { JSONSchema7Object } from 'json-schema'
-import { IObject, NodeData } from '../types'
+import { CompositionType, IObject, NodeData } from '../types'
 import { getLayoutedElements } from '../utils/dagreUtils'
+import SchemaNode from './SchemaNode'
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
@@ -47,11 +54,54 @@ const initialEdges: [Edge] = [
   },
 ]
 
+// Edge colors for different composition types
+const compositionEdgeColors: Record<CompositionType, string> = {
+  [CompositionType.OneOf]: '#f59e0b', // orange
+  [CompositionType.AnyOf]: '#8b5cf6', // purple
+  [CompositionType.AllOf]: '',
+  [CompositionType.Not]: '#ef4444', // red
+}
+
+// Define node and edge types outside component to prevent re-renders
+const edgeTypes = {
+  smart: SmartBezierEdge,
+}
+
+const nodeTypes = {
+  schema: SchemaNode,
+}
+
 function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodeProps) {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
+  const [hoveredCompositionNode, setHoveredCompositionNode] = useState<{
+    nodeId: string
+    compositionType: CompositionType
+  } | null>(null)
   const { setCenter } = useReactFlow()
+
+  // Compute styled edges based on hovered composition node
+  const styledEdges = useMemo(() => {
+    // Skip styling for allOf - all properties are just regular required properties
+    if (!hoveredCompositionNode || hoveredCompositionNode.compositionType === CompositionType.AllOf) {
+      return edges
+    }
+
+    return edges.map((edge) => {
+      if (edge.source === hoveredCompositionNode.nodeId) {
+        return {
+          ...edge,
+          style: {
+            stroke: compositionEdgeColors[hoveredCompositionNode.compositionType],
+            strokeWidth: 2,
+          },
+          animated: true,
+        }
+      }
+      return edge
+    })
+  }, [edges, hoveredCompositionNode])
   const onConnect = useCallback(
     (connection: Connection) =>
       setEdges((eds) =>
@@ -201,16 +251,22 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
             ...(node.data.relations as Record<number, string>),
             ...(item.data.relations as Record<number, string>),
           }
+          const compositionType = getCompositionType(item.data)
+          // Use custom schema node type if node has composition, otherwise use default types
+          const nodeType = compositionType
+            ? 'schema'
+            : children?.length > 0 ? 'default' : 'output'
           itemChildren.push({
             id: item.id,
-            type: children?.length > 0 ? 'default' : 'output',
+            type: nodeType,
             data: {
-              label: item.data.label,
+              label: `${item.data.label}`,
               children: children,
               parent: item.data.parent,
               examples: item.data.examples,
               description: item.data.description,
               relations: relations,
+              compositionType,
             },
             position: position,
             sourcePosition: Position.Right,
@@ -222,23 +278,36 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       nNodes[node.id] = node
       setnNodes(nNodes)
     }
+
+    // Track hovered node if it has a composition type
+    const nodeData = node.data as unknown as NodeData
+    if (nodeData.compositionType) {
+      setHoveredCompositionNode({
+        nodeId: node.id,
+        compositionType: nodeData.compositionType,
+      })
+    }
+
     setCurrentNode(node)
   }
 
-  const edgeTypes = {
-    smart: SmartBezierEdge,
+  // On Node Mouse Leave
+  function handleMouseLeave() {
+    setHoveredCompositionNode(null)
   }
 
   return (
     <ReactFlow
       nodes={nodes}
-      edges={edges}
+      edges={styledEdges}
       edgeTypes={edgeTypes}
+      nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       connectionLineType={ConnectionLineType.SmoothStep}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onNodeMouseEnter={handleMouseEnter}
+      onNodeMouseLeave={handleMouseLeave}
       onNodeClick={nodeClick}
       fitView={true}
       defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
