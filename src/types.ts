@@ -28,6 +28,7 @@ export interface NodeData {
   examples?: any;
   parent: string;
   compositionType?: CompositionType | null;
+  compositionSource?: CompositionType;  // Tags children that came from a composition (oneOf/anyOf/not)
 }
 
 // export interface INode extends Node {

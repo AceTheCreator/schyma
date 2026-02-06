@@ -90,18 +90,25 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
 
     return edges.map((edge) => {
       if (edge.source === hoveredCompositionNode.nodeId) {
-        return {
-          ...edge,
-          style: {
-            stroke: compositionEdgeColors[hoveredCompositionNode.compositionType],
-            strokeWidth: 2,
-          },
-          animated: true,
+        // Find the target node to check if it has a matching compositionSource
+        const targetNode = nodes.find((n) => n.id === edge.target)
+        const targetCompositionSource = targetNode?.data?.compositionSource as CompositionType | undefined
+
+        // Only color edges to children that came from the composition
+        if (targetCompositionSource === hoveredCompositionNode.compositionType) {
+          return {
+            ...edge,
+            style: {
+              stroke: compositionEdgeColors[hoveredCompositionNode.compositionType],
+              strokeWidth: 2,
+            },
+            animated: true,
+          }
         }
       }
       return edge
     })
-  }, [edges, hoveredCompositionNode])
+  }, [edges, hoveredCompositionNode, nodes])
   const onConnect = useCallback(
     (connection: Connection) =>
       setEdges((eds) =>
@@ -243,6 +250,9 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
           let children: Node[] = []
           const label = (item.data as unknown as NodeData).label
           const extractProps = propMerge(item.data, label)
+          // Extract and remove metadata before creating children
+          const nestedComposition = extractProps._nestedComposition as CompositionType | undefined
+          delete extractProps._nestedComposition
           if (Object.keys(extractProps).length > 0) {
             const res = await extractChildren(extractProps, item)
             children = res
@@ -251,7 +261,11 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
             ...(node.data.relations as Record<number, string>),
             ...(item.data.relations as Record<number, string>),
           }
-          const compositionType = getCompositionType(item.data)
+          // Check for direct composition or nested composition (from items/additionalProperties)
+          const directComposition = getCompositionType(item.data)
+          const compositionType = directComposition || nestedComposition || null
+          // Get composition source tag if this child came from a composition
+          const compositionSource = item.data._compositionSource as CompositionType | undefined
           // Use custom schema node type if node has composition, otherwise use default types
           const nodeType = compositionType
             ? 'schema'
@@ -267,6 +281,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
               description: item.data.description,
               relations: relations,
               compositionType,
+              compositionSource,
             },
             position: position,
             sourcePosition: Position.Right,

@@ -63,12 +63,20 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
   // Handle oneOf - flatten items since exactly ONE must match
   if (schema.oneOf) {
     const props = arrayToProps(schema.oneOf, label)
+    // Tag each prop with its composition source
+    for (const key of Object.keys(props)) {
+      props[key] = { ...props[key], _compositionSource: CompositionType.OneOf }
+    }
     Object.assign(mergedProps, props)
   }
 
   // Handle anyOf - flatten items since AT LEAST ONE must match
   if (schema.anyOf) {
     const props = arrayToProps(schema.anyOf, label)
+    // Tag each prop with its composition source
+    for (const key of Object.keys(props)) {
+      props[key] = { ...props[key], _compositionSource: CompositionType.AnyOf }
+    }
     Object.assign(mergedProps, props)
   }
 
@@ -76,9 +84,9 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
   if (schema.not) {
     if (schema.not.$ref) {
       const name = nameFromRef(schema.not.$ref)
-      mergedProps[name] = schema.not
+      mergedProps[name] = { ...schema.not, _compositionSource: CompositionType.Not }
     } else if (schema.not.type) {
-      mergedProps[schema.not.type] = schema.not
+      mergedProps[schema.not.type] = { ...schema.not, _compositionSource: CompositionType.Not }
     }
   }
 }
@@ -195,16 +203,22 @@ export function propMerge(schema: any, label: string) {
   if (properties) {
     Object.assign(mergedProps, properties)
   }
-  if (additionalProperties || items) {
-    const arrWithObject = additionalProperties || items
-    if (arrWithObject.oneOf || arrWithObject.allOf || arrWithObject.anyOf) {
-      const items = arrWithObject.oneOf || arrWithObject.anyOf || arrWithObject.not
-      const props = arrayToProps(items, label)
-      Object.assign(mergedProps, props)
+  if (items) {
+    const itemsComposition = getCompositionType(items)
+    const itemsProps = propMerge(items, label)
+    Object.assign(mergedProps, itemsProps)
+    // Propagate composition type from items to parent
+    if (itemsComposition) {
+      mergedProps._nestedComposition = itemsComposition
     }
-    if (arrWithObject.$ref) {
-      const name = nameFromRef(arrWithObject.$ref)
-      mergedProps[name] = arrWithObject
+  }
+  if (additionalProperties && typeof additionalProperties === 'object') {
+    const additionalComposition = getCompositionType(additionalProperties)
+    const additionalProps = propMerge(additionalProperties, label)
+    Object.assign(mergedProps, additionalProps)
+    // Propagate composition type from additionalProperties to parent
+    if (additionalComposition && !mergedProps._nestedComposition) {
+      mergedProps._nestedComposition = additionalComposition
     }
   }
   if (compositions) {
@@ -213,20 +227,32 @@ export function propMerge(schema: any, label: string) {
   return mergedProps
 }
 
+function getSchemaName(schema: any, label: string, index: number): string {
+  if (schema.title) {
+    return schema.title
+  }
+  if (schema.$ref) {
+    return nameFromRef(schema.$ref)
+  }
+  if (schema.properties) {
+    for (const key of Object.keys(schema.properties)) {
+      const prop = schema.properties[key]
+      if (prop.const !== undefined) {
+        return String(prop.const)
+      }
+    }
+  }
+  if (schema.type && schema.type !== 'object') {
+    return `${schema.type}`
+  }
+  return `${label} ${index + 1}`
+}
+
 export function arrayToProps(props: any, label: string) {
   const propObj: any = {}
   for (let i = 0; i < props.length; i++) {
-    if (props[i].$ref) {
-      const name = nameFromRef(props[i].$ref)
-      propObj[name] = props[i]
-    } else {
-      if (props[i].type === 'object') {
-        const objectName = props[i].title || `${label}Object`
-        propObj[objectName] = props[i]
-      } else {
-        propObj[props[i].type] = props[i]
-      }
-    }
+    const name = getSchemaName(props[i], label, i)
+    propObj[name] = props[i]
   }
   return propObj
 }
