@@ -14,7 +14,10 @@
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "prepare": "npm run build",
-    "copy-files": "copyfiles -u 1 -E -V \"src/**/*.*css\" dist/cjs && copyfiles -u 1 -E -V \"src/**/*.*css\" dist/esm"
+    "copy-files": "copyfiles -u 1 -E -V \"src/**/*.*css\" dist/cjs && copyfiles -u 1 -E -V \"src/**/*.*css\" dist/esm",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "peerDependencies": {
     "react": ">=16"

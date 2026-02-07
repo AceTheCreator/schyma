@@ -27,13 +27,10 @@ export function nameFromRef(ref: string): string {
 }
 
 const handleCompostions = (schema: any, mergedProps: any, label: string) => {
-  console.log(label)
-  // Handle allOf - merge all properties since ALL must be satisfied
   if (schema.allOf) {
     let propObj: Record<string, unknown> = {}
     for (const item of schema.allOf) {
       if (item.type === 'object') {
-        // Merge all property types from the object
         if (item.properties) {
           propObj = { ...propObj, ...item.properties }
         }
@@ -41,14 +38,13 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
           propObj = { ...propObj, ...item.patternProperties }
         }
         if (item.additionalProperties && typeof item.additionalProperties === 'object') {
-          // additionalProperties can be a schema object or boolean
           if (item.additionalProperties.$ref) {
             const name = nameFromRef(item.additionalProperties.$ref)
             propObj[name] = item.additionalProperties
           }
+          //TODO: handle inline additionalProperties schemas that aren't refs? Rare but possible
         }
       } else if (item.if) {
-        // Handle conditional schemas - call handleConditions for each
         handleConditions(item, propObj)
       } else if (item.$ref) {
         const name = nameFromRef(item.$ref)
@@ -60,7 +56,6 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
     Object.assign(mergedProps, propObj)
   }
 
-  // Handle oneOf - flatten items since exactly ONE must match
   if (schema.oneOf) {
     const props = arrayToProps(schema.oneOf, label)
     // Tag each prop with its composition source
@@ -70,7 +65,6 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
     Object.assign(mergedProps, props)
   }
 
-  // Handle anyOf - flatten items since AT LEAST ONE must match
   if (schema.anyOf) {
     const props = arrayToProps(schema.anyOf, label)
     // Tag each prop with its composition source
@@ -80,7 +74,6 @@ const handleCompostions = (schema: any, mergedProps: any, label: string) => {
     Object.assign(mergedProps, props)
   }
 
-  // Handle not - single schema
   if (schema.not) {
     if (schema.not.$ref) {
       const name = nameFromRef(schema.not.$ref)
@@ -178,6 +171,12 @@ const handleConditions = (schema: any, mergedProps: any) => {
   // Add then schema as the expandable content
   if (thenSchema) {
     mergedProps[displayLabel] = thenSchema
+
+    //TODO: Come back to this and support missing properties
+    // if (thenSchema.required) {
+    //   mergedProps[displayLabel].description = JSON.stringify(thenSchema.required)
+    // }
+    // console.log(thenSchema)
   }
 
   // If there's an else, add it too
