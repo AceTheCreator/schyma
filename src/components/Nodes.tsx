@@ -283,12 +283,9 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
             id: item.id,
             type: nodeType,
             data: {
+              ...item.data, // Preserve all original schema data including rules
               label: `${item.data.label}`,
               children: children,
-              parent: item.data.parent,
-              examples: item.data.examples,
-              description: item.data.description,
-              required: item.data.required,
               relations: relations,
               compositionType,
               compositionSource,

@@ -631,3 +631,17 @@
 .panel_table-wrapper_tbody_active .required-sentence {
   color: white;
 }
+
+/* Rules Block Styles */
+.rules-block {
+  display: block;
+  margin-top: 6px;
+  padding-bottom: 5px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: #854d0e;
+}
+
+.panel_table-wrapper_tbody_active .rules-block {
+  color: white;
+}
