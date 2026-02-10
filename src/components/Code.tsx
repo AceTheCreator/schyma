@@ -1,23 +1,23 @@
-import React from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dracula } from "react-syntax-highlighter/dist/cjs/styles/hljs";
+import React from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { prism } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 const CodeComponent = ({ children }: any) => {
-  return  (
+  return (
     <SyntaxHighlighter
-      language="javascript"
-      style={dracula}
+      language='json'
+      style={prism}
       customStyle={{
-        background: "#1E293B",
-        borderRadius: "10px",
-        color: "#94A3B8"
+        margin: 0,
+        borderRadius: 0,
+        background: '#ffffff',
+        fontSize: '12px',
       }}
       showLineNumbers={true}
-      
     >
       {children}
     </SyntaxHighlighter>
-  ) 
-};
+  )
+}
 
-export default CodeComponent;
+export default CodeComponent

@@ -129,18 +129,24 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     const children: Node[] = []
     for (const prop in props) {
       const id = String(Math.floor(Math.random() * 1000000))
-      if (props[prop].$ref) {
-        const res = await resolveRef(props[prop].$ref, schema)
+      const propData = props[prop]
+      const compositionSource = propData._compositionSource as CompositionType | undefined
+      const directComposition = getCompositionType(propData)
+
+      if (propData.$ref) {
+        const res = await resolveRef(propData.$ref, schema)
         children.push({
           id,
-          type: 'input',
+          type: directComposition ? 'schema' : 'default',
           data: {
-            ...props[prop],
+            ...propData,
             label: prop,
             parent: parent.id,
             relations: { ...parent.relations, [parent.id]: 'node' },
             ...res,
             children: [],
+            compositionType: directComposition,
+            compositionSource,
           },
           position: position,
           sourcePosition: Position.Right,
@@ -149,14 +155,16 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       } else {
         children.push({
           id,
-          type: 'input',
+          type: directComposition ? 'schema' : 'default',
           data: {
-            ...props[prop],
+            ...propData,
             label: prop,
             id,
             parent: parent.id,
             relations: { ...parent.relations, [parent.id]: 'node' },
             children: [],
+            compositionType: directComposition,
+            compositionSource,
           },
           position: position,
           sourcePosition: Position.Right,
@@ -171,15 +179,18 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     const newNodes: Node[] = []
     const properties = (initialNode.data as unknown as NodeData).properties
     const children = await extractChildren(properties, initialNode)
+    const nodeType = initialNode.data.compositionType ? 'schema' : 'input'
     newNodes.push({
       id: initialNode.id,
-      type: 'input',
+      type: nodeType,
       data: {
         children,
         label: initialNode.data.label,
         description: initialNode.data.description,
         properties: initialNode.data.properties,
         relations: initialNode.data.relations,
+        compositionType: initialNode.data.compositionType,
+        isRoot: true,
       },
       position: { x: 0, y: 0 },
       sourcePosition: Position.Right,
@@ -267,9 +278,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
           // Get composition source tag if this child came from a composition
           const compositionSource = item.data._compositionSource as CompositionType | undefined
           // Use custom schema node type if node has composition, otherwise use default types
-          const nodeType = compositionType
-            ? 'schema'
-            : children?.length > 0 ? 'default' : 'output'
+          const nodeType = compositionType ? 'schema' : children?.length > 0 ? 'default' : 'output'
           itemChildren.push({
             id: item.id,
             type: nodeType,
@@ -279,6 +288,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
               parent: item.data.parent,
               examples: item.data.examples,
               description: item.data.description,
+              required: item.data.required,
               relations: relations,
               compositionType,
               compositionSource,

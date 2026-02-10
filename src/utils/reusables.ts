@@ -1,15 +1,11 @@
 import refRes from '@json-schema-tools/reference-resolver'
-import { CompositionType } from '../types'
+import { handleConditions } from './conditions'
+import { getCompositionType, handleCompositions } from './compositions'
+
+// Re-export for backwards compatibility
+export { getCompositionType, arrayToProps } from './compositions'
 
 const memoizedNameFromRef: Record<string, string> = {}
-
-export function getCompositionType(schema: any): CompositionType | null {
-  if (schema.oneOf) return CompositionType.OneOf
-  if (schema.anyOf) return CompositionType.AnyOf
-  if (schema.allOf) return CompositionType.AllOf
-  if (schema.not) return CompositionType.Not
-  return null
-}
 
 export async function resolveRef(ref: string, schema: any) {
   const resolver = await refRes.resolve(ref, schema)
@@ -24,166 +20,6 @@ export function nameFromRef(ref: string): string {
   const name = match ? match[0].split('.')[0] : ''
   memoizedNameFromRef[ref] = name
   return name
-}
-
-const handleCompostions = (schema: any, mergedProps: any, label: string) => {
-  if (schema.allOf) {
-    let propObj: Record<string, unknown> = {}
-    for (const item of schema.allOf) {
-      if (item.type === 'object') {
-        if (item.properties) {
-          propObj = { ...propObj, ...item.properties }
-        }
-        if (item.patternProperties) {
-          propObj = { ...propObj, ...item.patternProperties }
-        }
-        if (item.additionalProperties && typeof item.additionalProperties === 'object') {
-          if (item.additionalProperties.$ref) {
-            const name = nameFromRef(item.additionalProperties.$ref)
-            propObj[name] = item.additionalProperties
-          }
-          //TODO: handle inline additionalProperties schemas that aren't refs? Rare but possible
-        }
-      } else if (item.if) {
-        handleConditions(item, propObj)
-      } else if (item.$ref) {
-        const name = nameFromRef(item.$ref)
-        propObj[name] = item
-      } else if (item.type) {
-        propObj[item.type] = item
-      }
-    }
-    Object.assign(mergedProps, propObj)
-  }
-
-  if (schema.oneOf) {
-    const props = arrayToProps(schema.oneOf, label)
-    // Tag each prop with its composition source
-    for (const key of Object.keys(props)) {
-      props[key] = { ...props[key], _compositionSource: CompositionType.OneOf }
-    }
-    Object.assign(mergedProps, props)
-  }
-
-  if (schema.anyOf) {
-    const props = arrayToProps(schema.anyOf, label)
-    // Tag each prop with its composition source
-    for (const key of Object.keys(props)) {
-      props[key] = { ...props[key], _compositionSource: CompositionType.AnyOf }
-    }
-    Object.assign(mergedProps, props)
-  }
-
-  if (schema.not) {
-    if (schema.not.$ref) {
-      const name = nameFromRef(schema.not.$ref)
-      mergedProps[name] = { ...schema.not, _compositionSource: CompositionType.Not }
-    } else if (schema.not.type) {
-      mergedProps[schema.not.type] = { ...schema.not, _compositionSource: CompositionType.Not }
-    }
-  }
-}
-
-// Extract a readable condition label from an if schema
-function extractConditionLabel(ifSchema: any): { label: string; prop: string } {
-  // Case 1: not wrapper - negation
-  if (ifSchema.not) {
-    const inner = extractConditionLabel(ifSchema.not)
-    return {
-      label: `no ${inner.label}`,
-      prop: inner.prop,
-    }
-  }
-
-  // Case 2: properties with value checks (const, enum, type)
-  if (ifSchema.properties) {
-    const propKeys = Object.keys(ifSchema.properties)
-    if (propKeys.length > 0) {
-      const mainProp = propKeys[0]
-      const propSchema = ifSchema.properties[mainProp]
-
-      // const value check
-      if (propSchema.const !== undefined) {
-        return {
-          label: `${mainProp} = ${propSchema.const}`,
-          prop: mainProp,
-        }
-      }
-
-      // enum with single value
-      if (propSchema.enum && propSchema.enum.length === 1) {
-        return {
-          label: `${mainProp} = ${propSchema.enum[0]}`,
-          prop: mainProp,
-        }
-      }
-
-      // type check
-      if (propSchema.type) {
-        return {
-          label: `${mainProp} is ${propSchema.type}`,
-          prop: mainProp,
-        }
-      }
-
-      // Just property existence via properties (rare but possible)
-      return {
-        label: mainProp,
-        prop: mainProp,
-      }
-    }
-  }
-
-  // Case 3: required - checking property existence
-  if (ifSchema.required && ifSchema.required.length > 0) {
-    const prop = ifSchema.required[0]
-    return {
-      label: `${prop} exists`,
-      prop,
-    }
-  }
-
-  // Case 4: type check on the schema itself
-  if (ifSchema.type) {
-    return {
-      label: `type is ${ifSchema.type}`,
-      prop: 'type',
-    }
-  }
-
-  // Fallback
-  return {
-    label: 'condition',
-    prop: 'unknown',
-  }
-}
-
-const handleConditions = (schema: any, mergedProps: any) => {
-  const { if: ifSchema, then: thenSchema, else: elseSchema } = schema
-
-  if (!ifSchema) return
-
-  const { label: conditionLabel, prop: conditionProp } = extractConditionLabel(ifSchema)
-
-  // Build the display label
-  const displayLabel = `if ${conditionLabel}`
-
-  // Add then schema as the expandable content
-  if (thenSchema) {
-    mergedProps[displayLabel] = thenSchema
-
-    //TODO: Come back to this and support missing properties
-    // if (thenSchema.required) {
-    //   mergedProps[displayLabel].description = JSON.stringify(thenSchema.required)
-    // }
-    // console.log(thenSchema)
-  }
-
-  // If there's an else, add it too
-  if (elseSchema) {
-    const elseLabel = `else (${conditionProp})`
-    mergedProps[elseLabel] = elseSchema
-  }
 }
 
 export function propMerge(schema: any, label: string) {
@@ -221,39 +57,9 @@ export function propMerge(schema: any, label: string) {
     }
   }
   if (compositions) {
-    handleCompostions(schema, mergedProps, label)
+    handleCompositions(schema, mergedProps, label)
   }
   return mergedProps
-}
-
-function getSchemaName(schema: any, label: string, index: number): string {
-  if (schema.title) {
-    return schema.title
-  }
-  if (schema.$ref) {
-    return nameFromRef(schema.$ref)
-  }
-  if (schema.properties) {
-    for (const key of Object.keys(schema.properties)) {
-      const prop = schema.properties[key]
-      if (prop.const !== undefined) {
-        return String(prop.const)
-      }
-    }
-  }
-  if (schema.type && schema.type !== 'object') {
-    return `${schema.type}`
-  }
-  return `${label} ${index + 1}`
-}
-
-export function arrayToProps(props: any, label: string) {
-  const propObj: any = {}
-  for (let i = 0; i < props.length; i++) {
-    const name = getSchemaName(props[i], label, i)
-    propObj[name] = props[i]
-  }
-  return propObj
 }
 
 export function removeElementsByParent(nodes: any, id: any) {

@@ -4,7 +4,7 @@ import Panel from "./Panel";
 import { useState } from "react";
 import Nodes from "./Nodes";
 import Ajv from "ajv";
-import { propMerge } from "../utils/reusables";
+import { propMerge, getCompositionType } from "../utils/reusables";
 import { ISchyma } from "../types";
 
 function Schyma({ title, description, schema }: ISchyma) {
@@ -14,13 +14,17 @@ function Schyma({ title, description, schema }: ISchyma) {
   const [render, setRender] = useState(false);
   const position = { x: 0, y: 0 };
   const properties = propMerge(schema, "");
+  const compositionType = getCompositionType(schema);
   const initialNode: Node = {
     id: '1',
+    type: compositionType ? 'schema' : 'input',
     data: {
-      label: title, 
-      description, 
-      properties: properties, 
+      label: title,
+      description,
+      properties: properties,
       relations: {},
+      compositionType,
+      isRoot: true,
     },
     position,
   }

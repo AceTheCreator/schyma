@@ -476,12 +476,116 @@
   border-bottom-width: 1px;
   top: 100%;
 }
-.examples-wrapper{
+.panel-code-section {
   margin-top: 50px;
 }
 
-.examples-wrapper > h1 {
-  padding-bottom: 10px;
+.main-tabs {
+  display: flex;
+  gap: 0;
+  background-color: #f4f5f8;
+  height: 35px;
+  align-items: stretch;
+  margin: 0 -6px;
+  padding-left: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.main-tab {
+  padding: 0 20px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.main-tab:first-child {
+  padding-left: 26px;
+}
+
+.main-tab-active {
+  background-color: white;
+  color:#439cfd
+}
+
+.main-tab:hover{
+  color: #439cfd
+}
+
+
+.examples-wrapper {
+  margin-top: 0;
+}
+
+.json-wrapper {
+  margin-top: 0;
+}
+
+.examples-content {
+  overflow: hidden;
+}
+
+.example-header {
+  background-color: #ffffff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  margin: 0 -6px;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 1;
+}
+
+.examples-tabs {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+  flex-wrap: wrap;
+}
+
+.examples-tab {
+  padding: 2px 12px;
+  font-size: 13px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.examples-tab:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.examples-tab-active {
+  background-color: #334155;
+  color: white;
+  border-color: #334155;
+}
+
+.examples-tab-active:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+  color: white;
+}
+
+.examples-code-container {
+  height: 500px;
+  overflow-y: auto;
+  background-color: #ffffff;
 }
 
 /* Custom Schema Node Styles */
@@ -513,4 +617,17 @@
   font-weight: bold;
   cursor: help;
   background: white;
+}
+
+/* Required Fields Styles */
+.required-sentence {
+  font-size: 12px;
+  font-style: italic;
+  color: #6b7280;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.panel_table-wrapper_tbody_active .required-sentence {
+  color: white;
 }
