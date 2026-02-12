@@ -2,36 +2,48 @@
 /* these are the necessary styles for React Flow, they get used by base.css and style.css */
 
 .body-wrapper{
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  height: 100vh;
 }
 
 .node-container{
-  width: 60%;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .panel{
-  padding: 6px;
-  min-width: 40%;
-  max-width: 40%;
-  border-left: 1px solid #334155;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 45%;
   height: 100vh;
+  padding: 6px;
+  background: white;
+  border-left: 1px solid #334155;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  transition: transform 0.2s ease-in-out;
+}
+
+.panel-content {
+  height: 100%;
   overflow-y: scroll;
 }
 
-.panel > h1 {
+.panel-content > h1 {
   margin: 10px;
   font-weight: bold;
   font-size: 25px;
 }
 
-.panel > h1::first-letter{
+.panel-content > h1::first-letter{
   text-transform: uppercase;
 }
 
-.panel > p {
+.panel-content > p {
   font-size: 16px;
   margin: 10px;
 }
@@ -588,7 +600,6 @@
   background-color: #ffffff;
 }
 
-/* Custom Schema Node Styles */
 .schema-node {
   padding: 10px;
   border-radius: 3px;
@@ -611,15 +622,15 @@
 
 .composition-symbol {
   position: absolute;
-  top: -6px;
+  top: 50%;
   right: -6px;
+  transform: translateY(-50%);
   font-size: 12px;
   font-weight: bold;
   cursor: help;
   background: white;
 }
 
-/* Required Fields Styles */
 .required-sentence {
   font-size: 12px;
   font-style: italic;
@@ -632,7 +643,6 @@
   color: white;
 }
 
-/* Rules Block Styles */
 .rules-block {
   display: block;
   margin-top: 6px;
@@ -644,4 +654,57 @@
 
 .panel_table-wrapper_tbody_active .rules-block {
   color: white;
+}
+
+.panel-toggle-btn {
+  position: fixed;
+  top: 10px;
+  right: calc(45% + 8px);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #64748b;
+  transition: background 0.2s ease, color 0.2s ease;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 11;
+}
+
+.panel-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.panel-wrapper-collapsed .panel-toggle-btn {
+  right: 8px;
+}
+
+.panel-icon-rect {
+  width: 6px;
+  transition: width 0.15s ease-in-out;
+}
+
+.panel-icon-rect-collapsed {
+  width: 3px;
+}
+
+.panel-toggle-btn:hover .panel-icon-rect {
+  width: 3px;
+}
+
+.panel-toggle-btn:hover .panel-icon-rect-collapsed {
+  width: 6px;
+}
+
+.panel-collapsed {
+  transform: translateX(100%);
+}
+
+.panel-wrapper-collapsed .panel-toggle-btn:hover + .panel-collapsed {
+  transform: translateX(0);
 }

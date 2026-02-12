@@ -12,6 +12,7 @@ export interface ISchyma {
   title: string
   description: string
   schema: JSONSchema7Object
+  defaultCollapsed?: boolean
 }
 
 export interface IObject {

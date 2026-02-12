@@ -7,11 +7,12 @@ import Ajv from "ajv";
 import { propMerge, getCompositionType } from "../utils/reusables";
 import { ISchyma } from "../types";
 
-function Schyma({ title, description, schema }: ISchyma) {
+function Schyma({ title, description, schema, defaultCollapsed = false }: ISchyma) {
   const ajv = new Ajv();
   const [currentNode, setCurrentNode] = useState<Node>();
   const [nNodes, setnNodes ] = useState<{[x: string]: Node}>({});
   const [render, setRender] = useState(false);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(defaultCollapsed);
   const position = { x: 0, y: 0 };
   const properties = propMerge(schema, "");
   const compositionType = getCompositionType(schema);
@@ -39,13 +40,15 @@ function Schyma({ title, description, schema }: ISchyma) {
     <div>
       {render ? <div className="body-wrapper">
         <div className="node-container">
-          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} />
+          <Nodes setnNodes={setnNodes} setCurrentNode={setCurrentNode} nNodes={nNodes} initialNode={initialNode} schema={schema} isPanelCollapsed={isPanelCollapsed} />
         </div>
         <Panel
           title={title}
           description={description}
           node={currentNode}
           nodes={nNodes}
+          isCollapsed={isPanelCollapsed}
+          setIsCollapsed={setIsPanelCollapsed}
         />
       </div> : <div>loading</div>}
     </div>

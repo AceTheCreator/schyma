@@ -35,6 +35,7 @@ type NodeProps = {
   nNodes: { [x: string]: Node }
   initialNode: Node
   schema: JSONSchema7Object
+  isPanelCollapsed: boolean
 }
 
 const position = { x: 0, y: 0, zoom: 0.2 }
@@ -54,7 +55,6 @@ const initialEdges: [Edge] = [
   },
 ]
 
-// Edge colors for different composition types
 const compositionEdgeColors: Record<CompositionType, string> = {
   [CompositionType.OneOf]: '#f59e0b', // orange
   [CompositionType.AnyOf]: '#8b5cf6', // purple
@@ -71,7 +71,7 @@ const nodeTypes = {
   schema: SchemaNode,
 }
 
-function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodeProps) {
+function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelCollapsed }: NodeProps) {
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements([initialNode], initialEdges)
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges)
@@ -79,11 +79,25 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     nodeId: string
     compositionType: CompositionType
   } | null>(null)
-  const { setCenter } = useReactFlow()
+  const { setCenter, getViewport, setViewport } = useReactFlow()
+
+  // Handle initial viewport positioning after ReactFlow initializes
+  const onInit = useCallback(() => {
+    // Small delay to ensure fitView has completed
+    setTimeout(() => {
+      if (!isPanelCollapsed) {
+        const viewport = getViewport()
+        const panelWidth = window.innerWidth * 0.45
+        const screenOffset = panelWidth / 2
+        // Shift view left so content appears centered in 55% visible area
+        setViewport({ x: viewport.x - screenOffset, y: viewport.y, zoom: viewport.zoom }, { duration: 200 })
+      }
+    }, 100)
+  }, [isPanelCollapsed, getViewport, setViewport])
 
   // Compute styled edges based on hovered composition node
-  const styledEdges = useMemo(() => {
-    // Skip styling for allOf - all properties are just regular required properties
+  const styleCompositionEdges = useMemo(() => {
+    // Skip styling for allOf: (since we are flattening allOf by default, there's no reason to style it) - all properties are just regular required properties
     if (!hoveredCompositionNode || hoveredCompositionNode.compositionType === CompositionType.AllOf) {
       return edges
     }
@@ -204,7 +218,20 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Node focus when clicked
+  // Adjust viewport when panel collapses/expands
+  useEffect(() => {
+    const viewport = getViewport()
+    const panelWidth = window.innerWidth * 0.45
+    const screenOffset = panelWidth / 2
+
+    if (isPanelCollapsed) {
+      setViewport({ x: viewport.x + screenOffset, y: viewport.y, zoom: viewport.zoom }, { duration: 200 })
+    } else {
+      setViewport({ x: viewport.x - screenOffset, y: viewport.y, zoom: viewport.zoom }, { duration: 200 })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPanelCollapsed])
+
   const focusNode = (children: Node[], zoom: number) => {
     if (children.length === 0) return
     let middleChild = children[Math.floor(children.length / 2)]
@@ -212,7 +239,15 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     if (middleChildWithLatestPosition) {
       middleChild = middleChildWithLatestPosition
     }
-    setCenter(middleChild.position.x, middleChild.position.y, { zoom, duration: 1000 })
+
+    let targetX = middleChild.position.x
+    if (!isPanelCollapsed) {
+      const panelWidth = window.innerWidth * 0.45
+      const offsetInFlowCoords = panelWidth / 2 / zoom
+      targetX = targetX + offsetInFlowCoords
+    }
+
+    setCenter(targetX, middleChild.position.y, { zoom, duration: 1000 })
   }
 
   // On Node Click
@@ -283,7 +318,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
             id: item.id,
             type: nodeType,
             data: {
-              ...item.data, // Preserve all original schema data including rules
+              ...item.data,
               label: `${item.data.label}`,
               children: children,
               relations: relations,
@@ -301,7 +336,6 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       setnNodes(nNodes)
     }
 
-    // Track hovered node if it has a composition type
     const nodeData = node.data as unknown as NodeData
     if (nodeData.compositionType) {
       setHoveredCompositionNode({
@@ -313,7 +347,6 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
     setCurrentNode(node)
   }
 
-  // On Node Mouse Leave
   function handleMouseLeave() {
     setHoveredCompositionNode(null)
   }
@@ -321,7 +354,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
   return (
     <ReactFlow
       nodes={nodes}
-      edges={styledEdges}
+      edges={styleCompositionEdges}
       edgeTypes={edgeTypes}
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
@@ -331,6 +364,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
       onNodeMouseEnter={handleMouseEnter}
       onNodeMouseLeave={handleMouseLeave}
       onNodeClick={nodeClick}
+      onInit={onInit}
       fitView={true}
       defaultViewport={{ x: 1, y: 1, zoom: 0.9 }}
     >
@@ -341,7 +375,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema }: NodePr
   )
 }
 
-export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: NodeProps) => (
+export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema, isPanelCollapsed }: NodeProps) => (
   <ReactFlowProvider>
     <Flow
       setnNodes={setnNodes}
@@ -349,6 +383,7 @@ export default ({ setCurrentNode, setnNodes, nNodes, initialNode, schema }: Node
       setCurrentNode={setCurrentNode}
       initialNode={initialNode}
       schema={schema}
+      isPanelCollapsed={isPanelCollapsed}
     />
   </ReactFlowProvider>
 )
