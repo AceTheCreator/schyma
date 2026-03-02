@@ -1,0 +1,77 @@
+{
+  "name": "schyma",
+  "version": "1.0.7",
+  "description": "JSON Schemas Visualizer React component",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acethecreator/schyma.git"
+  },
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs && npm run copy-files",
+    "build:esm": "tsc -p tsconfig.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "prepare": "npm run build",
+    "copy-files": "copyfiles -u 1 -E -V \"src/**/*.*css\" dist/cjs && copyfiles -u 1 -E -V \"src/**/*.*css\" dist/esm",
+    "test": "jest -c jest.config.js",
+    "test:watch": "jest -c jest.config.js --watch",
+    "test:coverage": "jest -c jest.config.js --coverage"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "react",
+    "typescript",
+    "api-specifications",
+    "JSONSchema",
+    "APIs"
+  ],
+  "author": "acethecreator",
+  "license": "Apache Liscence 2.0",
+  "devDependencies": {
+    "@testing-library/react": "^13.3.0",
+    "@types/dagre": "^0.7.48",
+    "@types/jest": "^28.1.1",
+    "@types/react": "^18.0.12",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.30.0",
+    "eslint-plugin-react-hooks": "^4.5.0",
+    "jest": "^28.1.1",
+    "jest-canvas-mock": "^2.4.0",
+    "jest-environment-jsdom": "^28.1.1",
+    "lerna": "^9.0.5",
+    "mini-css-extract-plugin": "^2.7.6",
+    "prettier": "^2.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.1.0",
+    "ts-jest": "^28.0.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
+    "@json-schema-tools/reference-resolver": "^1.2.5",
+    "@tisoap/react-flow-smart-edge": "^3.0.0",
+    "@types/json-schema": "^7.0.12",
+    "ajv": "^8.12.0",
+    "json-schema-traverse": "^1.0.0",
+    "node-fetch": "^3.3.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "reactflow": "^11.11.4",
+    "tslib": "^2.5.3",
+    "typescript-plugin-css-modules": "^5.0.1"
+  }
+}

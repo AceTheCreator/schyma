@@ -50,6 +50,29 @@ export default function App() {
 }
 ```
 
+## Monorepo Development
+
+This repository is now organized as a monorepo:
+
+- `packages/library`: the published `schyma` package
+- `packages/playground`: a local React playground that consumes the workspace library
+
+Run from the repository root:
+
+```bash
+npm install
+npm run dev
+```
+
+Useful commands:
+
+```bash
+npm run build
+npm run build:library
+npm run build:playground
+npm run test
+```
+
 ## Props
 
 Common props you may want to specify include:

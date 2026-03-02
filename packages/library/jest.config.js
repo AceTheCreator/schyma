@@ -6,5 +6,5 @@ module.exports = {
   testMatch: ['**/*.test.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   collectCoverageFrom: ['src/utils/**/*.ts'],
-  coverageDirectory: 'coverage',
+  coverageDirectory: 'coverage'
 }
