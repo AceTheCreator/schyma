@@ -1,5 +1,5 @@
 import refRes from '@json-schema-tools/reference-resolver'
-import { handleConditions } from './conditions'
+import { handleConditions } from '../helpers/conditions'
 import { getCompositionType, handleCompositions } from './compositions'
 
 // Re-export for backwards compatibility

@@ -1,6 +1,6 @@
 import { CompositionType } from '../types'
 import { nameFromRef } from './reusables'
-import { handleConditions } from './conditions'
+import { handleConditions } from '../helpers/conditions'
 
 export function getCompositionType(schema: any): CompositionType | null {
   if (schema.oneOf) return CompositionType.OneOf

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Node } from 'reactflow'
 import Tables from './Tables'
 import CodeComponent from './Code'
-import { formatRequiredSentence } from '../utils/formatRequired'
+import { formatRequiredSentence } from '../helpers/formatRequired'
 import SidebarIcon from '../icons/SidebarIcon'
 
 type Props = {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Node } from 'reactflow'
-import { formatRequiredSentence } from '../utils/formatRequired'
-import { formatRulesSentence } from '../utils/rules'
+import { formatRequiredSentence } from '../helpers/formatRequired'
+import { formatRulesSentence } from '../helpers/rules'
 
 interface Children {
   nodes: Node[]
@@ -34,9 +34,7 @@ function Tables({ nodes, active }: Children) {
                 <th scope=''>{node.data.label}</th>
                 <td>
                   {description}
-                  {rulesSentence && (
-                    <code className='rules-block'>{rulesSentence}</code>
-                  )}
+                  {rulesSentence && <code className='rules-block'>{rulesSentence}</code>}
                   {nodeRequired && nodeRequired.length > 0 && (
                     <p className='required-sentence'>{formatRequiredSentence(nodeRequired)}</p>
                   )}
