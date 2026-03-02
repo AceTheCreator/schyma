@@ -1,15 +1,11 @@
 import Schyma from 'schyma'
-import schema from './sample-schema.json'
+import schema from './asyncapi.json'
 
 export default function App() {
   return (
-    <main className="app-shell">
-      <section className="canvas">
-        <Schyma
-          title="Playground Schema"
-          description="Workspace playground for local Schyma development"
-          schema={schema}
-        />
+    <main className='h-full p-4'>
+      <section className='h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm'>
+        <Schyma title='AsyncAPI 3.1' description='The AsyncAPI Specification JSON Schema file' schema={schema} />
       </section>
     </main>
   )

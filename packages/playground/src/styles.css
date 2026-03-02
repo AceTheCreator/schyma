@@ -1,29 +1,16 @@
-:root {
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  line-height: 1.5;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
 
-body {
-  background: #f5f7fb;
-}
-
-.app-shell {
-  height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.canvas {
-  height: 100%;
-  border-radius: 12px;
-  border: 1px solid #d8e0f0;
-  overflow: hidden;
-  background: #ffffff;
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+  }
 }
