@@ -8,16 +8,6 @@ Schyma is a tool designed to simplify the visualization of JSON Schemas, making 
 
 - Interactive Visualization: The visualizer provides an interactive and intuitive graphical representation of the JSON Schema. Names, Descriptions, Examples, and other essential details are visually presented for better understanding.
 
-## Upcoming Features
-
-- Search and Filtering: Quickly search for specific part of the spec or filter. This feature enhances the user experience when dealing with large JSON Schemas.
-
-- Ability to support very large JSON Schemas
-
-- Additional Panel to render selected Node Schema
-
-- Generating dummy APIs fronm the given specification
-
 ## Supported JSON Schema Formats
 
 The JSON Schema Visualizer currently supports the following JSON Schema formats:
@@ -87,16 +77,6 @@ Common props you may want to specify include:
 ## Contributing
 We welcome contributions from the community! If you find a bug, have a feature request, or want to contribute in any way.
 
-
-# Thanks
-
-We would like to thank the contributors and supporters of the JSON Schema Visualizer project for their valuable contributions and feedback.
-
-If you like Schyma, you should [follow me on Twitter](https://twitter.com/_acebuild)!
-
-Shout out to the [AsyncAPI Community](https://github.com/asyncapi), [Lukasz Gornicki](https://github.com/derberg) who along with many other contributors have made this possible ❤️
-
-Thank you for your interest in our JSON Schema Visualizer project! For more information or to report issues, please visit the [project repository](). Happy visualizing! 🚀
 
 ## License
 

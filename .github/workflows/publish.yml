@@ -1,0 +1,54 @@
+name: Publish Package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (library)
+        run: npm -w schyma run test -- --watchman=false
+
+      - name: Build library
+        run: npm -w schyma run build
+
+      - name: Verify release tag matches package version
+        if: github.event_name == 'release'
+        run: |
+          PKG_VERSION=$(node -p "require('./packages/library/package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Release tag version ($TAG_VERSION) does not match package version ($PKG_VERSION)."
+            exit 1
+          fi
+
+      - name: Publish to npm
+        working-directory: packages/library
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
