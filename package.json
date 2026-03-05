@@ -1,5 +1,5 @@
 {
-  "name": "schyma",
+  "name": "schyma-monorepo",
   "repository": {
     "type": "git",
     "url": "https://github.com/acethecreator/schyma.git"
