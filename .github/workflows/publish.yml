@@ -49,3 +49,5 @@ jobs:
 
       - name: Publish to npm
         run: npm publish -w schyma --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
