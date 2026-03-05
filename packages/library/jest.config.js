@@ -8,8 +8,6 @@ module.exports = {
     }
   },
   roots: ['<rootDir>/src'],
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/__tests__/**/*.ts?(x)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  collectCoverageFrom: ['src/utils/**/*.ts'],
-  coverageDirectory: 'coverage'
 }

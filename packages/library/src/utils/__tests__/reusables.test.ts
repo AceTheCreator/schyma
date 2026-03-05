@@ -1,5 +1,5 @@
-import { getCompositionType, propMerge, arrayToProps, nameFromRef } from './reusables'
-import { CompositionType } from '../types'
+import { getCompositionType, propMerge, arrayToProps, nameFromRef } from '../reusables'
+import { CompositionType } from '../../types'
 
 describe('getCompositionType', () => {
   it('returns OneOf for oneOf schemas', () => {

@@ -26,7 +26,7 @@ import {
 } from '../utils/reusables'
 import { JSONSchema7Object } from 'json-schema'
 import { CompositionType, IObject, NodeData } from '../types'
-import { getLayoutedElements } from '../utils/dagreUtils'
+import { getLayoutedElements } from '../utils/dagreLayout'
 import SchemaNode from './SchemaNode'
 
 type NodeProps = {
