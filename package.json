@@ -1,6 +1,5 @@
 {
   "name": "schyma",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/acethecreator/schyma.git"
