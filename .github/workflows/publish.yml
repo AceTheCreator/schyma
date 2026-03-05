@@ -47,7 +47,8 @@ jobs:
             exit 1
           fi
 
+      - name: Debug npmrc
+        run: cat ~/.npmrc
+
       - name: Publish to npm
         run: npm publish -w schyma --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
