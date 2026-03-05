@@ -1,5 +1,4 @@
 {
-  "name": "schyma-monorepo",
   "private": true,
   "repository": {
     "type": "git",
