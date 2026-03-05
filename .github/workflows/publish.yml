@@ -48,7 +48,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        working-directory: packages/library
         run: npm publish --provenance --access public
-        env:
-          NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
