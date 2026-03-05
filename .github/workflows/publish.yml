@@ -48,4 +48,5 @@ jobs:
           fi
 
       - name: Publish to npm
+        working-directory: packages/library
         run: npm publish --provenance --access public
