@@ -22,16 +22,16 @@ export interface IObject {
 export interface NodeData {
   label: string
   id: string
-  children: Node[] // children is an array of Node elements, or it can be any specific type you want
+  children: Node[]
   description?: string
   properties?: any
   relations: any
   examples?: any
-  required?: string[] // Array of required property names
+  required?: string[]
   parent: string
   compositionType?: CompositionType | null
-  compositionSource?: CompositionType // Tags children that came from a composition (oneOf/anyOf/not)
-  isRoot?: boolean // True for the root/initial node (no left handle)
+  compositionSource?: CompositionType
+  isRoot?: boolean
 }
 
 // export interface INode extends Node {

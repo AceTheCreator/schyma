@@ -27,7 +27,8 @@ import {
 import { JSONSchema7Object } from 'json-schema'
 import { CompositionType, IObject, NodeData } from '../types'
 import { getLayoutedElements } from '../utils/dagreLayout'
-import SchemaNode from './SchemaNode'
+import SchemaNode from './CustomNode'
+import { compositionEdgeColors, initialEdges, position } from '../constants/node'
 
 type NodeProps = {
   setCurrentNode: (node: Node) => void
@@ -36,30 +37,6 @@ type NodeProps = {
   initialNode: Node
   schema: JSONSchema7Object
   isPanelCollapsed: boolean
-}
-
-const position = { x: 0, y: 0, zoom: 0.2 }
-const initialEdges: [Edge] = [
-  {
-    id: 'edges-e5-7',
-    source: '0',
-    target: '1',
-    label: '+',
-    labelBgPadding: [8, 4],
-    labelBgBorderRadius: 4,
-    animated: true,
-    type: 'smart',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-  },
-]
-
-const compositionEdgeColors: Record<CompositionType, string> = {
-  [CompositionType.OneOf]: '#f59e0b', // orange
-  [CompositionType.AnyOf]: '#8b5cf6', // purple
-  [CompositionType.AllOf]: '',
-  [CompositionType.Not]: '#ef4444', // red
 }
 
 // Define node and edge types outside component to prevent re-renders
@@ -81,21 +58,17 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
   } | null>(null)
   const { setCenter, getViewport, setViewport } = useReactFlow()
 
-  // Handle initial viewport positioning after ReactFlow initializes
   const onInit = useCallback(() => {
-    // Small delay to ensure fitView has completed
     setTimeout(() => {
       if (!isPanelCollapsed) {
         const viewport = getViewport()
         const panelWidth = window.innerWidth * 0.45
         const screenOffset = panelWidth / 2
-        // Shift view left so content appears centered in 55% visible area
         setViewport({ x: viewport.x - screenOffset, y: viewport.y, zoom: viewport.zoom }, { duration: 200 })
       }
     }, 100)
   }, [isPanelCollapsed, getViewport, setViewport])
 
-  // Compute styled edges based on hovered composition node
   const styleCompositionEdges = useMemo(() => {
     // Skip styling for allOf: (since we are flattening allOf by default, there's no reason to style it) - all properties are just regular required properties
     if (!hoveredCompositionNode || hoveredCompositionNode.compositionType === CompositionType.AllOf) {
@@ -104,11 +77,8 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
 
     return edges.map((edge) => {
       if (edge.source === hoveredCompositionNode.nodeId) {
-        // Find the target node to check if it has a matching compositionSource
         const targetNode = nodes.find((n) => n.id === edge.target)
         const targetCompositionSource = targetNode?.data?.compositionSource as CompositionType | undefined
-
-        // Only color edges to children that came from the composition
         if (targetCompositionSource === hoveredCompositionNode.compositionType) {
           return {
             ...edge,
@@ -123,6 +93,7 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
       return edge
     })
   }, [edges, hoveredCompositionNode, nodes])
+
   const onConnect = useCallback(
     (connection: Connection) =>
       setEdges((eds) =>
@@ -250,7 +221,6 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
     setCenter(targetX, middleChild.position.y, { zoom, duration: 1000 })
   }
 
-  // On Node Click
   const nodeClick = async (_event: React.MouseEvent, node: Node) => {
     const findChildren = nodes.filter((item) => item?.data?.parent === node.id)
     if (!findChildren.length) {
@@ -286,7 +256,6 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
     }
   }
 
-  //On Node Hover
   async function handleMouseEnter(_e: React.MouseEvent, node: Node) {
     if (!nNodes[node.id]) {
       const itemChildren: Node[] = []
@@ -296,7 +265,6 @@ function Flow({ initialNode, nNodes, setnNodes, setCurrentNode, schema, isPanelC
           let children: Node[] = []
           const label = (item.data as unknown as NodeData).label
           const extractProps = propMerge(item.data, label)
-          // Extract and remove metadata before creating children
           const nestedComposition = extractProps._nestedComposition as CompositionType | undefined
           delete extractProps._nestedComposition
           if (Object.keys(extractProps).length > 0) {

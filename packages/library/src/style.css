@@ -601,7 +601,7 @@
   background-color: #ffffff;
 }
 
-.schema-node {
+.custom-node {
   padding: 10px;
   border-radius: 3px;
   min-width: 150px;
@@ -613,11 +613,11 @@
   position: relative;
 }
 
-.schema-node:hover {
+.custom-node:hover {
   box-shadow: 0 1px 4px 1px rgba(0, 0, 0, 0.08);
 }
 
-.schema-node-label {
+.custom-node-label {
   font-weight: 500;
 }
 
@@ -709,4 +709,12 @@
 .panel-wrapper-collapsed .panel-toggle-btn:hover + .panel-collapsed,
 .panel-wrapper-collapsed .panel-collapsed:hover {
   transform: translateX(0);
+}
+
+.activity-loader{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
 }
