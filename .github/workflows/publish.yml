@@ -48,4 +48,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: npm publish -w schyma --provenance --access public
