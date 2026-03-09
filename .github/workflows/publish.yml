@@ -45,9 +45,9 @@ jobs:
             echo "Release tag version ($TAG_VERSION) does not match package version ($PKG_VERSION)."
             exit 1
           fi
-          
-      - name: Debug npm auth
-        run: npm whoami
+
+      - name: Show workflow file
+        run: ls .github/workflows
 
       - name: Publish to npm
         working-directory: packages/library
