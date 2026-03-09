@@ -7,7 +7,7 @@
   "types": "./dist/esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/acethecreator/schyma"
+    "url": "https://github.com/AceTheCreator/schyma"
   },
   "author": "Azeez Elegbede",
   "license": "Apache-2.0",
