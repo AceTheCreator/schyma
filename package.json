@@ -10,7 +10,7 @@
   },
   "license": "Apache Liscence 2.0",
   "workspaces": [
-    "packages/*"
+    "packages/library"
   ],
   "scripts": {
     "clean": "lerna clean",
