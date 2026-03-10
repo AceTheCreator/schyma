@@ -7,6 +7,7 @@ export default function App() {
       <section className='h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm'>
         <Schyma title='AsyncAPI 3.1' description='The AsyncAPI Specification JSON Schema file' schema={schema} />
       </section>
+      <h1>Hello world</h1>
     </main>
   )
 }

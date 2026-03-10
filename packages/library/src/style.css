@@ -7,6 +7,14 @@
   height: 100vh;
 }
 
+.panel-wrapper,
+.panel-wrapper-collapsed {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
 .node-container{
   width: 100%;
   height: 100%;
@@ -15,17 +23,18 @@
 }
 
 .panel{
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   width: 45%;
-  height: 100vh;
+  height: 100%;
   padding: 6px;
   background: white;
   border-left: 1px solid #334155;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
   transition: transform 0.2s ease-in-out;
+  pointer-events: auto;
 }
 
 .panel-content {
@@ -691,7 +700,7 @@
 }
 
 .panel-toggle-btn {
-  position: fixed;
+  position: absolute;
   top: 10px;
   right: calc(45% + 8px);
   width: 40px;
@@ -707,6 +716,7 @@
   transition: background 0.2s ease, color 0.2s ease;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   z-index: 11;
+  pointer-events: auto;
 }
 
 .panel-toggle-btn:hover {
