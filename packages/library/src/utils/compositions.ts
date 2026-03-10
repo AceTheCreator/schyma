@@ -85,8 +85,6 @@ export const handleCompositions = (schema: any, mergedProps: any, label: string)
         handleConditions(item, mergedProps)
       } else {
         const name = getSchemaName(item, label, i)
-        console.log(name)
-        console.log(item)
         mergedProps[name] = { ...item, _compositionSource: compositionType }
       }
     }
