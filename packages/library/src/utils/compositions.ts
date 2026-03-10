@@ -25,6 +25,9 @@ function getSchemaName(schema: any, label: string, index: number): string {
       }
     }
   }
+  if (schema.type && schema.const) {
+    return `${schema.const}`
+  }
   if (schema.type && schema.type !== 'object') {
     return `${schema.type}`
   }
@@ -82,6 +85,8 @@ export const handleCompositions = (schema: any, mergedProps: any, label: string)
         handleConditions(item, mergedProps)
       } else {
         const name = getSchemaName(item, label, i)
+        console.log(name)
+        console.log(item)
         mergedProps[name] = { ...item, _compositionSource: compositionType }
       }
     }

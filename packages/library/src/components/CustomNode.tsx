@@ -1,18 +1,10 @@
 import React from 'react'
 import { Handle, Position, NodeProps } from 'reactflow'
-import { CompositionType, NodeData } from '../types'
+import { NodeData } from '../types'
 import { compositionEdgeColors } from '../constants/node'
-
-const compositionSymbols: Record<CompositionType, string> = {
-  [CompositionType.OneOf]: '⊕',
-  [CompositionType.AnyOf]: '⊛',
-  [CompositionType.AllOf]: '',
-  [CompositionType.Not]: '⊘',
-}
 
 const SchemaNode: React.FC<NodeProps<NodeData>> = ({ data }) => {
   const { label, compositionType, isRoot } = data
-  const symbol = compositionType ? compositionSymbols[compositionType] : null
   const symbolColor = compositionType ? compositionEdgeColors[compositionType] : undefined
 
   return (
@@ -21,10 +13,11 @@ const SchemaNode: React.FC<NodeProps<NodeData>> = ({ data }) => {
 
       <span className='custom-node-label'>{label}</span>
 
-      {symbol && (
-        <span className='composition-symbol' style={{ color: symbolColor }} title={compositionType || undefined}>
-          {symbol}
-        </span>
+      {symbolColor && (
+        <>
+          <span className='composition-symbol' style={{ color: symbolColor }} aria-hidden='true'></span>
+          <span className='composition-tooltip'>{compositionType}</span>
+        </>
       )}
 
       <Handle type='source' position={Position.Right} style={{ background: symbolColor || undefined }} />
