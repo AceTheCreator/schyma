@@ -3,14 +3,14 @@ import { Node } from 'reactflow'
 import Panel from './Panel'
 import { useState } from 'react'
 import Nodes from './Nodes'
-import Ajv from 'ajv'
 import { propMerge, getCompositionType } from '../utils/reusables'
 import { ISchyma } from '../types'
 import { position } from '../constants/node'
 import Loader from '../icons/Loader'
+import { getValidator } from '../helpers/ajv'
 
 function Schyma({ title, description, schema, defaultCollapsed = false }: ISchyma) {
-  const ajv = new Ajv()
+  const ajv = getValidator((schema as any)?.$schema)
   const [currentNode, setCurrentNode] = useState<Node>()
   const [nNodes, setnNodes] = useState<{ [x: string]: Node }>({})
   const [render, setRender] = useState<boolean>(false)
@@ -31,12 +31,16 @@ function Schyma({ title, description, schema, defaultCollapsed = false }: ISchym
     position,
   }
 
-  const validate = ajv.validateSchema(schema)
+  let validate = false
+  try {
+    const result = ajv.validateSchema(schema)
+    validate = typeof result === 'boolean' ? result : false
+  } catch {
+    validate = false
+  }
 
   useEffect(() => {
-    if (validate) {
-      setRender(true)
-    }
+    setRender(validate)
   }, [validate])
   return (
     <div>

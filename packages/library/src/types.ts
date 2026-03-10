@@ -1,4 +1,4 @@
-import { JSONSchema7Object } from 'json-schema'
+import { JSONSchema4Object, JSONSchema7Object } from 'json-schema'
 import { Node } from 'reactflow'
 
 export enum CompositionType {
@@ -11,7 +11,7 @@ export enum CompositionType {
 export interface ISchyma {
   title: string
   description: string
-  schema: JSONSchema7Object
+  schema: JSONSchema4Object | JSONSchema7Object
   defaultCollapsed?: boolean
 }
 
